@@ -1,5 +1,5 @@
 import type { UUID } from '../../../shared/types/common.types';
-
+export type UserRole = "ROLE_USER" | "ROLE_ADMIN";
 export interface UserProfile {
   id: UUID;
   username: string;
@@ -8,8 +8,9 @@ export interface UserProfile {
   avatarUrl?: string;
   coverUrl?: string;
   website?: string;
+  roles: UserRole[];
+  createdAt: string;
   location?: string;
-  joinedAt?: string;
   followersCount: number;
   followingCount: number;
   postsCount: number;

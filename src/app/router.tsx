@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthGuard } from '../shared/components/guards/AuthGuard';
 import { GuestGuard } from '../shared/components/guards/GuestGuard';
 import { MainLayout } from '../shared/components/layout/MainLayout';
