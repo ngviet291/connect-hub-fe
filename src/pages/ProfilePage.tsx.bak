@@ -1,0 +1,186 @@
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { userApi } from '../features/user/api/userApi';
+import type { UserProfile } from '../features/user/types/user.types';
+import { Avatar } from '../shared/components/ui/Avatar';
+import { Button } from '../shared/components/ui/Button';
+import { Dropdown } from '../shared/components/ui/Dropdown';
+import { ProfileHeaderSkeleton, PostSkeleton } from '../shared/components/ui/Skeleton';
+import { ErrorState } from '../shared/components/ui/ErrorState';
+import { EmptyState } from '../shared/components/ui/EmptyState';
+import { Tabs } from '../shared/components/ui/Tabs';
+import {
+  ArrowLeftIcon,
+  SettingsIcon,
+  MoreHorizontalIcon,
+  SunIcon,
+  MoonIcon,
+} from '../shared/components/icons/Icons';
+import { useAuth } from '../features/auth/store/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import { useUserPosts } from '../features/post/hooks/useUserPosts';
+import { PostCard } from '../features/post/components/PostCard';
+import { EditProfileModal } from '../features/user/components/EditProfileModal';
+
+export const ProfilePage = () => {
+  const { username } = useParams<{ username: string }>();
+  const navigate = useNavigate();
+  const { user: me, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const { locale, setLocale, t } = useLanguage();
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loadError, setLoadError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [editOpen, setEditOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'posts' | 'replies'>('posts');
+  const { posts, isLoading: postsLoading, toggleLike, toggleRepost, toggleBookmark, removePost } = useUserPosts(username);
+
+  const fetchProfile = () => {
+    if (!username) return;
+    setIsLoading(true);
+    setLoadError(false);
+    userApi
+      .getProfile(username)
+      .then(setProfile)
+      .catch(() => setLoadError(true))
+      .finally(() => setIsLoading(false));
+  };
+
+  useEffect(fetchProfile, [username]);
+  useEffect(() => setActiveTab('posts'), [username]);
+
+  if (isLoading) return <ProfileHeaderSkeleton />;
+  if (loadError || !profile) return <ErrorState message={t('user_not_found')} onRetry={fetchProfile} />;
+
+  const isMe = me?.username === username;
+
+  const toggleFollow = async () => {
+    profile.isFollowing ? await userApi.unfollow(profile.id) : await userApi.follow(profile.id);
+    setProfile((p) => (p ? { ...p, isFollowing: !p.isFollowing, followersCount: p.followersCount + (p.isFollowing ? -1 : 1) } : p));
+  };
+
+  return (
+    <div className="animate-fade-in">
+      <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-border bg-surface/85 px-4 py-3 backdrop-blur-md">
+        <div className="flex items-center gap-4">
+          <button onClick={() => navigate(-1)} className="cursor-pointer rounded-full p-1.5 hover:bg-surface-hover md:hidden">
+            <ArrowLeftIcon size={20} />
+          </button>
+          <div>
+            <h1 className="text-lg font-bold text-text leading-tight">{profile.displayName}</h1>
+            <p className="text-xs text-secondary">{profile.postsCount} {t('posts_count_suffix')}</p>
+          </div>
+        </div>
+
+        <Dropdown
+          align="right"
+          menuClassName="rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10"
+          trigger={
+            <button className="cursor-pointer rounded-full p-1.5 text-secondary hover:bg-surface-hover hover:text-text">
+              <MoreHorizontalIcon size={20} />
+            </button>
+          }
+          items={
+            isMe
+              ? [
+                  {
+                    label: theme === 'dark' ? t('theme_light') : t('theme_dark'),
+                    icon: theme === 'dark' ? <SunIcon size={18} /> : <MoonIcon size={18} />,
+                    onClick: toggleTheme,
+                  },
+                  {
+                    label: `${t('language')}: ${locale === 'vi' ? 'Tiếng Việt' : 'English'}`,
+                    icon: <span className="text-xs font-bold">{locale === 'vi' ? 'VI' : 'EN'}</span>,
+                    onClick: () => setLocale(locale === 'vi' ? 'en' : 'vi'),
+                  },
+                  { label: t('nav_settings'), icon: <SettingsIcon size={18} />, onClick: () => navigate('/settings') },
+                  { label: t('nav_logout'), danger: true, onClick: logout },
+                ]
+              : [
+                  { label: t('unfollow'), onClick: () => {} },
+                  { label: t('block_user'), onClick: () => {} },
+                  { label: t('report'), danger: true, onClick: () => {} },
+                ]
+          }
+        />
+      </div>
+
+      <div className="p-4">
+        <div className="flex items-start justify-between">
+          <Avatar src={profile.avatarUrl} name={profile.displayName} size="xl" />
+          {isMe ? (
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => navigate('/settings')}>
+                <SettingsIcon size={18} />
+              </Button>
+              <Button variant="outline" onClick={() => setEditOpen(true)}>
+                {t('edit_profile_button')}
+              </Button>
+            </div>
+          ) : (
+            <Button variant={profile.isFollowing ? 'outline' : 'primary'} onClick={toggleFollow}>
+              {profile.isFollowing ? t('following') : t('follow')}
+            </Button>
+          )}
+        </div>
+
+        <div className="mt-4">
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-xl font-bold text-text">{profile.displayName}</h1>
+            {profile.isVerified && <span className="text-primary">✓</span>}
+          </div>
+          <p className="text-secondary">@{profile.username}</p>
+          {profile.bio && <p className="mt-2 whitespace-pre-wrap text-[15px] text-text">{profile.bio}</p>}
+          {(profile.location || profile.website) && (
+            <div className="mt-2 flex flex-wrap gap-3 text-sm text-secondary">
+              {profile.location && <span>📍 {profile.location}</span>}
+              {profile.website && <span className="text-primary">🔗 {profile.website}</span>}
+            </div>
+          )}
+        </div>
+
+        <div className="mt-4 flex gap-5 text-sm">
+          <button onClick={() => navigate(`/profile/${username}/followers`)} className="cursor-pointer hover:underline">
+            <span className="font-bold text-text">{profile.followersCount}</span> <span className="text-secondary">{t('followers_label')}</span>
+          </button>
+          <button onClick={() => navigate(`/profile/${username}/following`)} className="cursor-pointer hover:underline">
+            <span className="font-bold text-text">{profile.followingCount}</span> <span className="text-secondary">{t('following')}</span>
+          </button>
+        </div>
+      </div>
+
+      <Tabs
+        tabs={[{ key: 'posts', label: t('posts_tab') }, { key: 'replies', label: t('replies_tab') }]}
+        active={activeTab}
+        onChange={(key) => setActiveTab(key as 'posts' | 'replies')}
+      />
+
+      <div>
+        {activeTab === 'replies' ? (
+          <EmptyState title={t('replies_empty_title')} description={t('replies_empty_desc')} />
+        ) : (
+          <>
+            {postsLoading && Array.from({ length: 3 }).map((_, i) => <PostSkeleton key={i} />)}
+            {!postsLoading && posts.length === 0 && (
+              <EmptyState title={t('no_posts_title')} description={isMe ? t('no_posts_desc_self') : t('no_posts_desc_other')} />
+            )}
+            {!postsLoading &&
+              posts.map((p) => (
+                <PostCard key={p.id} post={p} onLike={toggleLike} onRepost={toggleRepost} onBookmark={toggleBookmark} onDelete={removePost} />
+              ))}
+          </>
+        )}
+      </div>
+
+      {isMe && (
+        <EditProfileModal
+          isOpen={editOpen}
+          onClose={() => setEditOpen(false)}
+          profile={profile}
+          onSaved={(updated) => setProfile(updated)}
+        />
+      )}
+    </div>
+  );
+};

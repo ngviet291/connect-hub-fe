@@ -1,0 +1,68 @@
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../features/auth/store/AuthContext';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { useLanguage } from '../../../contexts/LanguageContext';
+import { HomeIcon, SearchIcon, PlusSquareIcon, BellIcon, SunIcon, MoonIcon, UserIcon, SettingsIcon } from '../icons/Icons';
+import { useNotifications } from '../../../features/notification/hooks/useNotifications';
+import { Avatar } from '../ui/Avatar';
+import { Dropdown } from '../ui/Dropdown';
+
+export const BottomNav = ({ onCompose }: { onCompose: () => void }) => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const { unreadCount } = useNotifications();
+  const { theme, toggleTheme } = useTheme();
+  const { locale, setLocale, t } = useLanguage();
+
+  if (!user) return null;
+
+  const itemCls = ({ isActive }: { isActive: boolean }) =>
+    `flex flex-1 cursor-pointer items-center justify-center py-3 ${isActive ? 'text-text' : 'text-secondary'}`;
+
+  return (
+    <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-border bg-background/95 backdrop-blur-md md:hidden">
+      <NavLink to="/" end className={itemCls}>
+        <HomeIcon size={26} filled />
+      </NavLink>
+      <NavLink to="/search" className={itemCls}>
+        <SearchIcon size={26} />
+      </NavLink>
+      <button onClick={onCompose} className="flex flex-1 cursor-pointer items-center justify-center py-3 text-secondary">
+        <PlusSquareIcon size={26} />
+      </button>
+      <NavLink to="/notifications" className={itemCls}>
+        <span className="relative">
+          <BellIcon size={26} />
+          {unreadCount > 0 && <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-accent" />}
+        </span>
+      </NavLink>
+      <div className="flex flex-1 items-center justify-center py-3">
+        <Dropdown
+          align="right"
+          direction="up"
+          menuClassName="rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10"
+          trigger={
+            <button className="cursor-pointer">
+              <Avatar src={user.avatarUrl} name={user.displayName} size="xs" />
+            </button>
+          }
+          items={[
+            { label: t('nav_profile'), icon: <UserIcon size={18} />, onClick: () => navigate(`/profile/${user.username}`) },
+            {
+              label: theme === 'dark' ? t('theme_light') : t('theme_dark'),
+              icon: theme === 'dark' ? <SunIcon size={18} /> : <MoonIcon size={18} />,
+              onClick: toggleTheme,
+            },
+            {
+              label: `${t('language')}: ${locale === 'vi' ? 'Tiếng Việt' : 'English'}`,
+              icon: <span className="text-xs font-bold">{locale === 'vi' ? 'VI' : 'EN'}</span>,
+              onClick: () => setLocale(locale === 'vi' ? 'en' : 'vi'),
+            },
+            { label: t('nav_settings'), icon: <SettingsIcon size={18} />, onClick: () => navigate('/settings') },
+            { label: t('nav_logout'), danger: true, onClick: logout },
+          ]}
+        />
+      </div>
+    </nav>
+  );
+};
