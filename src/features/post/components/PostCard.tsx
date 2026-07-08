@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Avatar } from '../../../shared/components/ui/Avatar';
 import { Dropdown } from '../../../shared/components/ui/Dropdown';
 import { HeartIcon, CommentIcon, RepostIcon, ShareIcon, BookmarkIcon, MoreHorizontalIcon } from '../../../shared/components/icons/Icons';
-import { timeAgo } from '../../../shared/utils/date';
+import { useTimeAgo } from '../../../shared/utils/date';
 import { useAuth } from '../../auth/store/AuthContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import type { Post } from '../types/post.types';
@@ -22,6 +22,7 @@ export const PostCard = ({ post, onLike, onRepost, onBookmark, onDelete, clickab
   const navigate = useNavigate();
   const { user } = useAuth();
   const { t } = useLanguage();
+  const timeAgo = useTimeAgo();
   const isOwner = user?.username === post.user.username;
 
   const goToDetail = () => clickable && navigate(`/post/${post.id}`);

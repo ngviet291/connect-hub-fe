@@ -2,13 +2,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Avatar } from '../../../shared/components/ui/Avatar';
 import { UserRowSkeleton } from '../../../shared/components/ui/Skeleton';
 import { EmptyState } from '../../../shared/components/ui/EmptyState';
-import { timeAgo } from '../../../shared/utils/date';
+import { useTimeAgo } from '../../../shared/utils/date';
 import { useConversations } from '../hooks/useConversations';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { MailIcon } from '../../../shared/components/icons/Icons';
 
 export const ConversationList = () => {
   const { t } = useLanguage();
+  const timeAgo = useTimeAgo();
   const { conversations, isLoading } = useConversations();
   const { conversationId } = useParams<{ conversationId: string }>();
   const navigate = useNavigate();

@@ -1,3 +1,5 @@
+import type { UserRole } from '../../user/types/user.types';
+
 export interface LoginRequest {
   emailOrUsername: string;
   password: string;
@@ -21,6 +23,7 @@ export interface AuthUser {
   displayName: string;
   avatarUrl?: string;
   bio?: string;
+  roles: UserRole[];
 }
 
 export interface ForgotPasswordRequest {

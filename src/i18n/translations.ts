@@ -142,6 +142,35 @@ export const translations = {
     no_bookmarks_desc: 'Nhấn biểu tượng lưu trên bài viết để xem lại sau.',
 
     // Cài đặt
+
+    // Security settings
+    security_title: 'Bảo mật',
+    security_desc: 'Đổi mật khẩu và quản lý bảo mật tài khoản.',
+    current_password: 'Mật khẩu hiện tại',
+    new_password: 'Mật khẩu mới',
+    confirm_password: 'Xác nhận mật khẩu mới',
+    password_mismatch: 'Mật khẩu xác nhận không khớp.',
+    change_password_btn: 'Đổi mật khẩu',
+    password_updated: 'Đã cập nhật ✓',
+    two_factor_label: 'Xác thực 2 lớp (2FA)',
+    two_factor_desc: 'Bảo vệ tài khoản bằng mã xác thực bổ sung.',
+
+    // Privacy settings
+    privacy_title: 'Quyền riêng tư',
+    privacy_desc: 'Kiểm soát ai có thể xem và tương tác với nội dung của bạn.',
+    private_account_label: 'Tài khoản riêng tư',
+    private_account_desc: 'Chỉ người theo dõi mới xem được bài viết của bạn.',
+    hide_activity_label: 'Ẩn trạng thái hoạt động',
+    hide_activity_desc: 'Người khác sẽ không thấy khi bạn đang online.',
+    allow_mentions_label: 'Cho phép nhắc đến (@mention)',
+    allow_mentions_desc: 'Người khác có thể gắn thẻ bạn trong bài viết.',
+    allow_messages_label: 'Cho phép nhắn tin',
+    allow_messages_desc: 'Người khác có thể gửi tin nhắn trực tiếp cho bạn.',
+
+    // Theme settings
+    theme_desc: 'Chọn giao diện sáng hoặc tối cho ConnectHub.',
+    theme_auto_hint: 'Hệ thống sẽ tự động phát hiện giao diện của thiết bị nếu bạn chưa từng chọn thủ công.',
+    language_desc: 'Chọn ngôn ngữ hiển thị cho toàn bộ ứng dụng.',
     settings_account: 'Tài khoản',
     settings_privacy: 'Quyền riêng tư',
     settings_theme: 'Giao diện',
@@ -151,6 +180,13 @@ export const translations = {
     danger_zone: 'Vùng nguy hiểm',
     danger_zone_desc: 'Xóa tài khoản sẽ xóa vĩnh viễn toàn bộ dữ liệu của bạn.',
     delete_account: 'Xóa tài khoản',
+
+    // Thời gian tương đối (timeAgo)
+    time_just_now: 'vừa xong',
+    time_minutes: '{{count}} phút',
+    time_hours: '{{count}} giờ',
+    time_days: '{{count}} ngày',
+    time_weeks: '{{count}} tuần',
   },
   en: {
     nav_home: 'Home',
@@ -281,6 +317,35 @@ export const translations = {
     no_bookmarks_title: 'No saved posts',
     no_bookmarks_desc: 'Tap the save icon on a post to view it later.',
 
+
+    // Security settings
+    security_title: 'Security',
+    security_desc: 'Change your password and manage account security.',
+    current_password: 'Current password',
+    new_password: 'New password',
+    confirm_password: 'Confirm new password',
+    password_mismatch: 'Passwords do not match.',
+    change_password_btn: 'Change password',
+    password_updated: 'Updated ✓',
+    two_factor_label: 'Two-factor authentication (2FA)',
+    two_factor_desc: 'Protect your account with an additional verification code.',
+
+    // Privacy settings
+    privacy_title: 'Privacy',
+    privacy_desc: 'Control who can see and interact with your content.',
+    private_account_label: 'Private account',
+    private_account_desc: 'Only your followers can see your posts.',
+    hide_activity_label: 'Hide activity status',
+    hide_activity_desc: "Others won't see when you're online.",
+    allow_mentions_label: 'Allow mentions (@mention)',
+    allow_mentions_desc: 'Others can tag you in posts.',
+    allow_messages_label: 'Allow direct messages',
+    allow_messages_desc: 'Others can send you direct messages.',
+
+    // Theme settings
+    theme_desc: 'Choose a light or dark interface for ConnectHub.',
+    theme_auto_hint: "The system will automatically detect your device's theme if you haven't manually selected one.",
+    language_desc: 'Choose the display language for the entire application.',
     settings_account: 'Account',
     settings_privacy: 'Privacy',
     settings_theme: 'Appearance',
@@ -290,6 +355,13 @@ export const translations = {
     danger_zone: 'Danger zone',
     danger_zone_desc: 'Deleting your account will permanently remove all your data.',
     delete_account: 'Delete account',
+
+    // Relative time (timeAgo)
+    time_just_now: 'just now',
+    time_minutes: '{{count}}m',
+    time_hours: '{{count}}h',
+    time_days: '{{count}}d',
+    time_weeks: '{{count}}w',
   },
 } as const;
 

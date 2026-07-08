@@ -1,15 +1,19 @@
-import { useRef, useState } from 'react';
-import { Avatar } from '../../../shared/components/ui/Avatar';
-import { Button } from '../../../shared/components/ui/Button';
-import { Modal } from '../../../shared/components/ui/Modal';
-import { Textarea } from '../../../shared/components/ui/Textarea';
-import { ImageIcon, VideoIcon, XIcon } from '../../../shared/components/icons/Icons';
-import { useAuth } from '../../auth/store/AuthContext';
-import { useLanguage } from '../../../contexts/LanguageContext';
-import { POST_MAX_LENGTH } from '../../../constants/limits';
-import { mediaService } from '../../../services/media/mediaService';
-import type { Post, PostMedia } from '../types/post.types';
-import { postApi } from '../api/postApi';
+import { useRef, useState } from "react";
+import { Avatar } from "../../../shared/components/ui/Avatar";
+import { Button } from "../../../shared/components/ui/Button";
+import { Modal } from "../../../shared/components/ui/Modal";
+import { Textarea } from "../../../shared/components/ui/Textarea";
+import {
+  ImageIcon,
+  VideoIcon,
+  XIcon,
+} from "../../../shared/components/icons/Icons";
+import { useAuth } from "../../auth/store/AuthContext";
+import { useLanguage } from "../../../contexts/LanguageContext";
+import { POST_MAX_LENGTH } from "../../../constants/limits";
+import { mediaService } from "../../media/mediaService";
+import type { Post, PostMedia } from "../types/post.types";
+import { postApi } from "../api/postApi";
 
 interface CreatePostModalProps {
   isOpen: boolean;
@@ -17,10 +21,14 @@ interface CreatePostModalProps {
   onCreated: (post: Post) => void;
 }
 
-export const CreatePostModal = ({ isOpen, onClose, onCreated }: CreatePostModalProps) => {
+export const CreatePostModal = ({
+  isOpen,
+  onClose,
+  onCreated,
+}: CreatePostModalProps) => {
   const { user } = useAuth();
   const { t } = useLanguage();
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState("");
   const [media, setMedia] = useState<PostMedia[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -29,7 +37,7 @@ export const CreatePostModal = ({ isOpen, onClose, onCreated }: CreatePostModalP
 
   const reset = () => {
     media.forEach((m) => mediaService.revoke(m.url));
-    setContent('');
+    setContent("");
     setMedia([]);
   };
 
@@ -40,7 +48,11 @@ export const CreatePostModal = ({ isOpen, onClose, onCreated }: CreatePostModalP
 
   const handleFiles = async (files: FileList | null) => {
     if (!files) return;
-    const uploaded = await Promise.all(Array.from(files).slice(0, 4 - media.length).map((f) => mediaService.uploadFile(f)));
+    const uploaded = await Promise.all(
+      Array.from(files)
+        .slice(0, 4 - media.length)
+        .map((f) => mediaService.uploadFile(f)),
+    );
     setMedia((prev) => [...prev, ...uploaded]);
   };
 
@@ -66,7 +78,7 @@ export const CreatePostModal = ({ isOpen, onClose, onCreated }: CreatePostModalP
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title={t('nav_create')}>
+    <Modal isOpen={isOpen} onClose={handleClose} title={t("nav_create")}>
       <div className="p-4">
         <div className="flex gap-3">
           <Avatar src={user.avatarUrl} name={user.displayName} />
@@ -75,19 +87,28 @@ export const CreatePostModal = ({ isOpen, onClose, onCreated }: CreatePostModalP
             <Textarea
               autoFocus
               value={content}
-              onChange={(e) => setContent(e.target.value.slice(0, POST_MAX_LENGTH))}
-              placeholder={t('composer_placeholder')}
+              onChange={(e) =>
+                setContent(e.target.value.slice(0, POST_MAX_LENGTH))
+              }
+              placeholder={t("composer_placeholder")}
               rows={4}
               className="mt-1"
             />
             {media.length > 0 && (
               <div className="mt-2 grid grid-cols-2 gap-2">
                 {media.map((m) => (
-                  <div key={m.id} className="group relative overflow-hidden rounded-xl border border-border">
-                    {m.type === 'VIDEO' ? (
+                  <div
+                    key={m.id}
+                    className="group relative overflow-hidden rounded-xl border border-border"
+                  >
+                    {m.type === "VIDEO" ? (
                       <video src={m.url} className="h-32 w-full object-cover" />
                     ) : (
-                      <img src={m.url} alt="" className="h-32 w-full object-cover" />
+                      <img
+                        src={m.url}
+                        alt=""
+                        className="h-32 w-full object-cover"
+                      />
                     )}
                     <button
                       onClick={() => removeMedia(m.id)}
@@ -123,7 +144,9 @@ export const CreatePostModal = ({ isOpen, onClose, onCreated }: CreatePostModalP
               >
                 <VideoIcon size={20} />
               </button>
-              <span className={`ml-auto text-xs ${content.length > POST_MAX_LENGTH - 30 ? 'text-amber-500' : 'text-secondary'}`}>
+              <span
+                className={`ml-auto text-xs ${content.length > POST_MAX_LENGTH - 30 ? "text-amber-500" : "text-secondary"}`}
+              >
                 {content.length}/{POST_MAX_LENGTH}
               </span>
             </div>
@@ -131,9 +154,15 @@ export const CreatePostModal = ({ isOpen, onClose, onCreated }: CreatePostModalP
         </div>
 
         <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
-          <span className="text-xs text-secondary">{t('anyone_can_reply')}</span>
-          <Button onClick={handleSubmit} loading={isSubmitting} disabled={!content.trim() && media.length === 0}>
-            {t('post_button')}
+          <span className="text-xs text-secondary">
+            {t("anyone_can_reply")}
+          </span>
+          <Button
+            onClick={handleSubmit}
+            loading={isSubmitting}
+            disabled={!content.trim() && media.length === 0}
+          >
+            {t("post_button")}
           </Button>
         </div>
       </div>

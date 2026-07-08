@@ -1,11 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import { Avatar } from '../../../shared/components/ui/Avatar';
 import { HeartIcon } from '../../../shared/components/icons/Icons';
-import { timeAgo } from '../../../shared/utils/date';
+import { useTimeAgo } from '../../../shared/utils/date';
 import type { CommentItem as CommentItemType } from '../types/comment.types';
 
 export const CommentItem = ({ comment, onLike }: { comment: CommentItemType; onLike?: (id: string) => void }) => {
   const navigate = useNavigate();
+  const timeAgo = useTimeAgo();
   return (
     <div className="flex gap-3 border-b border-border px-4 py-3.5 animate-fade-in">
       <Avatar src={comment.user.avatarUrl} name={comment.user.displayName} size="sm" onClick={() => navigate(`/profile/${comment.user.username}`)} />

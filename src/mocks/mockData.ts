@@ -1,7 +1,7 @@
 import type { AuthUser } from '../features/auth/types/auth.types';
 import type { Post } from '../features/post/types/post.types';
 import type { UserProfile } from '../features/user/types/user.types';
-import type { CommentItem } from '../features/comment/types/comment.types';
+import type { CommentItem } from '../features/reply/types/comment.types';
 import type { AppNotification } from '../features/notification/types/notification.types';
 import type { Conversation, ChatMessage } from '../features/message/types/message.types';
 
@@ -12,6 +12,7 @@ export const MOCK_USER: AuthUser = {
   displayName: 'As Dev',
   avatarUrl: undefined,
   bio: 'Full-stack developer | Spring Boot & React',
+  roles: ['ROLE_ADMIN'], // TODO: đổi lại 'ROLE_USER' để test luồng phân quyền user thường
 };
 
 export const MOCK_USERS: UserProfile[] = [
@@ -22,7 +23,8 @@ export const MOCK_USERS: UserProfile[] = [
     bio: 'Full-stack developer | Spring Boot & React | Xây ConnectHub 🚀',
     website: 'connecthub.dev',
     location: 'Hồ Chí Minh, Việt Nam',
-    joinedAt: '2023-04-01T00:00:00.000Z',
+    roles: ["ROLE_USER"],
+    createdAt: '2023-04-01T00:00:00.000Z',
     followersCount: 128,
     followingCount: 64,
     postsCount: 12,
@@ -35,7 +37,8 @@ export const MOCK_USERS: UserProfile[] = [
     displayName: 'Jane Doe',
     bio: 'UI/UX Designer • Nghiện cà phê ☕',
     location: 'Đà Nẵng',
-    joinedAt: '2022-11-12T00:00:00.000Z',
+    roles: ["ROLE_ADMIN"],
+    createdAt: '2022-11-12T00:00:00.000Z',
     followersCount: 320,
     followingCount: 120,
     postsCount: 45,
@@ -46,33 +49,38 @@ export const MOCK_USERS: UserProfile[] = [
     username: 'john_smith',
     displayName: 'John Smith',
     bio: 'Backend engineer @ ConnectHub. Java • Spring • Kafka',
-    joinedAt: '2023-01-20T00:00:00.000Z',
+    roles: ["ROLE_USER"],
+    createdAt: '2023-01-20T00:00:00.000Z',
     followersCount: 88,
     followingCount: 40,
     postsCount: 7,
     isFollowing: false,
   },
   {
-    id: 'user-004',
-    username: 'linh.tran',
-    displayName: 'Linh Trần',
-    bio: 'Product Manager • Mèo lover 🐱',
-    followersCount: 512,
-    followingCount: 210,
-    postsCount: 88,
-    isFollowing: false,
-    isVerified: true,
-  },
+  id: "user-004",
+  username: "linh.tran",
+  displayName: "Linh Trần",
+  bio: "Product Manager • Mèo lover 🐱",
+  roles: ["ROLE_USER"],
+  createdAt: "2023-01-15T00:00:00.000Z",
+  followersCount: 512,
+  followingCount: 210,
+  postsCount: 88,
+  isFollowing: false,
+  isVerified: true,
+},
   {
-    id: 'user-005',
-    username: 'minh.nguyen',
-    displayName: 'Minh Nguyễn',
-    bio: 'Đam mê bóng đá ⚽ và du lịch',
-    followersCount: 76,
-    followingCount: 300,
-    postsCount: 30,
-    isFollowing: true,
-  },
+  id: "user-005",
+  username: "minh.nguyen",
+  displayName: "Minh Nguyễn",
+  bio: "Đam mê bóng đá ⚽ và du lịch",
+  roles: ["ROLE_USER"],
+  createdAt: "2023-03-20T00:00:00.000Z",
+  followersCount: 76,
+  followingCount: 300,
+  postsCount: 30,
+  isFollowing: true,
+},
 ];
 
 export const MOCK_POSTS: Post[] = [

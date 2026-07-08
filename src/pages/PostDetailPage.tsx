@@ -3,10 +3,10 @@ import { ArrowLeftIcon } from "../shared/components/icons/Icons";
 import { PostCard } from "../features/post/components/PostCard";
 import { PostSkeleton } from "../shared/components/ui/Skeleton";
 import { ErrorState } from "../shared/components/ui/ErrorState";
-import { CommentForm } from "../features/comment/components/CommentForm";
-import { CommentList } from "../features/comment/components/CommentList";
+import { CommentForm } from "../features/reply/replies/CommentForm";
+import { CommentList } from "../features/reply/replies/CommentList";
 import { usePostDetail } from "../features/post/hooks/usePostDetail";
-import { useComments } from "../features/comment/hooks/useComments";
+import { useComments } from "../features/reply/hooks/useComments";
 import { useLanguage } from "../contexts/LanguageContext";
 
 export const PostDetailPage = () => {

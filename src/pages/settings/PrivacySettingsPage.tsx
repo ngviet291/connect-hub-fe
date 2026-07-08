@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Toggle } from '../../shared/components/ui/Toggle';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const Row = ({ title, description, checked, onChange }: { title: string; description: string; checked: boolean; onChange: (v: boolean) => void }) => (
   <div className="flex items-center justify-between gap-4 border-b border-border py-4 last:border-0">
@@ -12,6 +13,7 @@ const Row = ({ title, description, checked, onChange }: { title: string; descrip
 );
 
 export const PrivacySettingsPage = () => {
+  const { t } = useLanguage();
   const [state, setState] = useState({
     privateAccount: false,
     hideActivity: false,
@@ -23,12 +25,12 @@ export const PrivacySettingsPage = () => {
 
   return (
     <div className="max-w-md">
-      <h2 className="mb-1 text-base font-semibold text-text">Quyền riêng tư</h2>
-      <p className="mb-2 text-sm text-secondary">Kiểm soát ai có thể xem và tương tác với nội dung của bạn.</p>
-      <Row title="Tài khoản riêng tư" description="Chỉ người theo dõi mới xem được bài viết của bạn." checked={state.privateAccount} onChange={set('privateAccount')} />
-      <Row title="Ẩn trạng thái hoạt động" description="Người khác sẽ không thấy khi bạn đang online." checked={state.hideActivity} onChange={set('hideActivity')} />
-      <Row title="Cho phép nhắc đến (@mention)" description="Người khác có thể gắn thẻ bạn trong bài viết." checked={state.allowMentions} onChange={set('allowMentions')} />
-      <Row title="Cho phép nhắn tin" description="Người khác có thể gửi tin nhắn trực tiếp cho bạn." checked={state.allowMessages} onChange={set('allowMessages')} />
+      <h2 className="mb-1 text-base font-semibold text-text">{t('privacy_title')}</h2>
+      <p className="mb-2 text-sm text-secondary">{t('privacy_desc')}</p>
+      <Row title={t('private_account_label')} description={t('private_account_desc')} checked={state.privateAccount} onChange={set('privateAccount')} />
+      <Row title={t('hide_activity_label')} description={t('hide_activity_desc')} checked={state.hideActivity} onChange={set('hideActivity')} />
+      <Row title={t('allow_mentions_label')} description={t('allow_mentions_desc')} checked={state.allowMentions} onChange={set('allowMentions')} />
+      <Row title={t('allow_messages_label')} description={t('allow_messages_desc')} checked={state.allowMessages} onChange={set('allowMessages')} />
     </div>
   );
 };

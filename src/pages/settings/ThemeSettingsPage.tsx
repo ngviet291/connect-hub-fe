@@ -23,8 +23,7 @@ export const ThemeSettingsPage = () => {
       <section>
         <h2 className="mb-1 text-base font-semibold text-text">{t('settings_theme')}</h2>
         <p className="mb-4 text-sm text-secondary">
-          Chọn giao diện sáng hoặc tối cho ConnectHub.
-        </p>
+{t('theme_desc')}</p>
         <div className="grid grid-cols-2 gap-3">
           {themeOptions.map((opt) => (
             <button
@@ -46,17 +45,14 @@ export const ThemeSettingsPage = () => {
             </button>
           ))}
         </div>
-        <p className="mt-3 text-xs text-secondary">
-          Hệ thống sẽ tự động phát hiện giao diện của thiết bị nếu bạn chưa từng chọn thủ công.
-        </p>
+        <p className="mt-3 text-xs text-secondary">{t('theme_auto_hint')}</p>
       </section>
 
       {/* ── Language ── */}
       <section>
         <h2 className="mb-1 text-base font-semibold text-text">{t('language')}</h2>
         <p className="mb-4 text-sm text-secondary">
-          Chọn ngôn ngữ hiển thị cho toàn bộ ứng dụng.
-        </p>
+{t('language_desc')}</p>
         <div className="flex flex-col gap-2">
           {langOptions.map((opt) => (
             <button

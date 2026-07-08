@@ -1,11 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import { Avatar } from '../../../shared/components/ui/Avatar';
-import { timeAgo } from '../../../shared/utils/date';
+import { useTimeAgo } from '../../../shared/utils/date';
 import type { AppNotification } from '../types/notification.types';
 import { NotificationIcon } from './NotificationIcon';
 
 export const NotificationItem = ({ notification, onRead }: { notification: AppNotification; onRead?: (id: string) => void }) => {
   const navigate = useNavigate();
+  const timeAgo = useTimeAgo();
 
   const handleClick = () => {
     onRead?.(notification.id);
