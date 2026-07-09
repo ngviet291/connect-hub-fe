@@ -6,12 +6,12 @@ import { UserListItem } from '../features/user/components/UserListItem';
 import { UserRowSkeleton } from '../shared/components/ui/Skeleton';
 import { EmptyState } from '../shared/components/ui/EmptyState';
 import { ArrowLeftIcon, UserIcon } from '../shared/components/icons/Icons';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 export const FollowListPage = ({ mode }: { mode: 'followers' | 'following' }) => {
   const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [users, setUsers] = useState<UserProfile[] | null>(null);
 
   useEffect(() => {

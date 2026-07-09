@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import type { Locale } from '../../i18n/translations';
 
 // Map locale nội bộ ('vi' | 'en') sang locale chuẩn Intl để format ngày tháng
@@ -13,7 +13,8 @@ const INTL_LOCALE: Record<Locale, string> = {
  * Dùng thay cho hàm timeAgo tĩnh cũ (hardcode 'vi-VN' + tiếng Việt cứng).
  */
 export const useTimeAgo = () => {
-  const { locale, t } = useLanguage();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language as Locale;
   const intlLocale = INTL_LOCALE[locale] ?? locale;
 
   return useMemo(
@@ -51,7 +52,8 @@ export const useTimeAgo = () => {
  * Hook trả về hàm format ngày đầy đủ (vd dùng cho tooltip khi hover timestamp), đổi theo locale hiện tại.
  */
 export const useFormatFullDate = () => {
-  const { locale } = useLanguage();
+  const { i18n } = useTranslation();
+  const locale = i18n.language as Locale;
   const intlLocale = INTL_LOCALE[locale] ?? locale;
 
   return useMemo(

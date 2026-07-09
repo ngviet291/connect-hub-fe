@@ -187,6 +187,65 @@ export const translations = {
     time_hours: '{{count}} giờ',
     time_days: '{{count}} ngày',
     time_weeks: '{{count}} tuần',
+
+    // Trang quản trị (admin)
+    admin_users_title: 'Quản trị người dùng',
+    admin_users_desc_before: 'Trang chỉ dành cho tài khoản có role',
+    admin_users_desc_after: 'Nối API danh sách người dùng (GetAllUser, ChangeStatus...) tại đây.',
+
+    // Trạng thái lỗi / trang lỗi dùng chung
+    error_generic: 'Đã có lỗi xảy ra. Vui lòng thử lại.',
+    retry: 'Thử lại',
+    back_home: 'Về trang chủ',
+    not_found_desc: 'Trang bạn tìm không tồn tại hoặc đã bị xóa.',
+    forbidden_desc: 'Bạn không có quyền truy cập trang này.',
+    messages_empty_hint: 'Chọn một cuộc trò chuyện để bắt đầu',
+
+    // Trang cá nhân (ProfilePage)
+    profile_tab_posts: 'Connect',
+    profile_tab_replies: 'Câu trả lời',
+    profile_tab_media: 'File phương tiện',
+    profile_tab_reposts: 'Bài đăng lại',
+    profile_stats_tooltip: 'Thống kê',
+    profile_whats_new: 'Có gì mới?',
+    profile_completion_title: 'Hoàn tất trang cá nhân',
+    profile_completion_remaining: 'Còn {{count}}',
+    profile_completion_create_title: 'Tạo connect',
+    profile_completion_create_desc: 'Chia sẻ suy nghĩ hoạt động nổi bật mới đây của bạn.',
+    profile_completion_create_cta: 'Tạo',
+    profile_completion_follow_title: 'Theo dõi 10 trang cá nhân',
+    profile_completion_follow_desc: 'Hãy lấp đầy bằng feed bằng những connect bạn quan tâm.',
+    profile_completion_follow_cta: 'Xem trang cá nhân',
+    media_empty_title: 'Chưa có file phương tiện',
+    media_empty_desc: 'Ảnh và video sẽ xuất hiện ở đây.',
+    reposts_empty_title: 'Chưa có bài đăng lại',
+    reposts_empty_desc: 'Bài đăng lại sẽ xuất hiện ở đây.',
+    footer_terms: 'Điều khoản của ConnectHub',
+    footer_privacy: 'Chính sách quyền riêng tư',
+    footer_cookies: 'Chính sách cookie',
+
+    // Lỗi service (user)
+    error_load_profile: 'Lỗi khi tải thông tin người dùng',
+    error_update_profile: 'Lỗi khi cập nhật thông tin người dùng',
+    error_load_users: 'Lỗi khi tải danh sách người dùng',
+    error_lock_user: 'Lỗi khi khóa người dùng',
+    error_unlock_user: 'Lỗi khi mở khóa người dùng',
+
+    // Lỗi service (auth)
+    error_login_failed: 'Đăng nhập thất bại',
+    error_register_failed: 'Đăng ký thất bại',
+
+    // Preview media trong danh sách hội thoại
+    media_preview_image: 'Hình ảnh',
+    media_preview_video: 'Video',
+
+    // Login / Register
+    login_invalid_credentials: 'Tên người dùng/email hoặc mật khẩu không đúng.',
+    login_identifier_placeholder: 'you@example.com hoặc @username',
+    register_password_too_short: 'Mật khẩu phải có ít nhất 6 ký tự.',
+    register_failed_retry: 'Đăng ký thất bại. Vui lòng thử lại.',
+    register_confirm_password: 'Xác nhận mật khẩu',
+    register_password_mismatch: 'Mật khẩu xác nhận không khớp.',
   },
   en: {
     nav_home: 'Home',
@@ -362,6 +421,65 @@ export const translations = {
     time_hours: '{{count}}h',
     time_days: '{{count}}d',
     time_weeks: '{{count}}w',
+
+    // Admin page
+    admin_users_title: 'User management',
+    admin_users_desc_before: 'This page is only for accounts with role',
+    admin_users_desc_after: 'Wire up the user list APIs (GetAllUser, ChangeStatus...) here.',
+
+    // Shared error / error pages
+    error_generic: 'Something went wrong. Please try again.',
+    retry: 'Retry',
+    back_home: 'Back to home',
+    not_found_desc: 'The page you are looking for does not exist or was removed.',
+    forbidden_desc: "You don't have permission to access this page.",
+    messages_empty_hint: 'Select a conversation to get started',
+
+    // Profile page
+    profile_tab_posts: 'Connects',
+    profile_tab_replies: 'Replies',
+    profile_tab_media: 'Media',
+    profile_tab_reposts: 'Reposts',
+    profile_stats_tooltip: 'Stats',
+    profile_whats_new: "What's new?",
+    profile_completion_title: 'Complete your profile',
+    profile_completion_remaining: '{{count}} left',
+    profile_completion_create_title: 'Create a connect',
+    profile_completion_create_desc: 'Share your latest thoughts and highlights.',
+    profile_completion_create_cta: 'Create',
+    profile_completion_follow_title: 'Follow 10 profiles',
+    profile_completion_follow_desc: 'Fill your feed with connects you care about.',
+    profile_completion_follow_cta: 'Browse profiles',
+    media_empty_title: 'No media yet',
+    media_empty_desc: 'Photos and videos will appear here.',
+    reposts_empty_title: 'No reposts yet',
+    reposts_empty_desc: 'Reposts will appear here.',
+    footer_terms: 'ConnectHub Terms',
+    footer_privacy: 'Privacy Policy',
+    footer_cookies: 'Cookie Policy',
+
+    // Service errors (user)
+    error_load_profile: 'Failed to load profile.',
+    error_update_profile: 'Failed to update profile.',
+    error_load_users: 'Failed to load users.',
+    error_lock_user: 'Failed to lock user.',
+    error_unlock_user: 'Failed to unlock user.',
+
+    // Service errors (auth)
+    error_login_failed: 'Login failed',
+    error_register_failed: 'Registration failed',
+
+    // Media preview in conversation list
+    media_preview_image: 'Image',
+    media_preview_video: 'Video',
+
+    // Login / Register
+    login_invalid_credentials: 'Incorrect username/email or password.',
+    login_identifier_placeholder: 'you@example.com or @username',
+    register_password_too_short: 'Password must be at least 6 characters.',
+    register_failed_retry: 'Registration failed. Please try again.',
+    register_confirm_password: 'Confirm password',
+    register_password_mismatch: 'Passwords do not match.',
   },
 } as const;
 

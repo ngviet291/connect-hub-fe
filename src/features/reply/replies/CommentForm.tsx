@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { Avatar } from '../../../shared/components/ui/Avatar';
 import { Button } from '../../../shared/components/ui/Button';
 import { useAuth } from '../../auth/store/AuthContext';
-import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { COMMENT_MAX_LENGTH } from '../../../constants/limits';
 
 export const CommentForm = ({ onSubmit }: { onSubmit: (content: string) => Promise<unknown> }) => {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 

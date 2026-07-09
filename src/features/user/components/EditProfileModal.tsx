@@ -4,7 +4,7 @@ import { Button } from '../../../shared/components/ui/Button';
 import { Input } from '../../../shared/components/ui/Input';
 import { Textarea } from '../../../shared/components/ui/Textarea';
 import { Modal } from '../../../shared/components/ui/Modal';
-import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { BIO_MAX_LENGTH } from '../../../constants/limits';
 import type { UpdateProfileRequest, UserProfile } from '../types/user.types';
 import { userApi } from '../api/userApi';
@@ -17,7 +17,7 @@ interface EditProfileModalProps {
 }
 
 export const EditProfileModal = ({ isOpen, onClose, profile, onSaved }: EditProfileModalProps) => {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [form, setForm] = useState<UpdateProfileRequest>({
     displayName: profile.displayName,
     bio: profile.bio ?? '',

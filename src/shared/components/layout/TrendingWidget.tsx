@@ -1,11 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { MOCK_TRENDS } from '../../../mocks/mockData';
 import { TrendingIcon } from '../icons/Icons';
-import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 export const TrendingWidget = () => {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   return (
     <div className="rounded-2xl border border-border bg-surface p-4">
       <div className="mb-1 flex items-center gap-2">

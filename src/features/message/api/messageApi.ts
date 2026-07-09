@@ -1,5 +1,6 @@
 import { MOCK_CONVERSATIONS, MOCK_MESSAGES, MOCK_USER } from '../../../mocks/mockData';
 import type { ChatMessage, Conversation, MessageAttachment } from '../types/message.types';
+import i18n from '../../../i18n/i18n';
 
 const delay = (ms = 350) => new Promise((r) => setTimeout(r, ms));
 
@@ -37,7 +38,7 @@ export const messageApi = {
       createdAt: new Date().toISOString(),
     };
     messages[conversationId] = [...(messages[conversationId] ?? []), msg];
-    const lastMessage = content || (media?.length ? (media[0].type === 'VIDEO' ? '📹 Video' : '📷 Hình ảnh') : '');
+    const lastMessage = content || (media?.length ? (media[0].type === 'VIDEO' ? `📹 ${i18n.t('media_preview_video')}` : `📷 ${i18n.t('media_preview_image')}`) : '');
     conversations = conversations.map((c) =>
       c.id === conversationId ? { ...c, lastMessage, lastMessageAt: msg.createdAt } : c
     );

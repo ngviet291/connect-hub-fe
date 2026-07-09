@@ -6,7 +6,7 @@ import { NotificationItemSkeleton } from '../shared/components/ui/Skeleton';
 import { BellIcon } from '../shared/components/icons/Icons';
 import { useNotifications } from '../features/notification/hooks/useNotifications';
 import { NotificationItem } from '../features/notification/components/NotificationItem';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 const FILTERS: Record<string, (type: string) => boolean> = {
   all: () => true,
@@ -15,7 +15,7 @@ const FILTERS: Record<string, (type: string) => boolean> = {
 };
 
 export const NotificationsPage = () => {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [tab, setTab] = useState('all');
   const { notifications, isLoading, error, markAsRead, markAllAsRead, refetch, unreadCount } = useNotifications();
   const filtered = notifications.filter((n) => FILTERS[tab](n.type));

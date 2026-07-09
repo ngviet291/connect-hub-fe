@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Avatar } from '../../../shared/components/ui/Avatar';
 import { Button } from '../../../shared/components/ui/Button';
 import type { UserProfile } from '../types/user.types';
-import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 interface UserListItemProps {
   user: UserProfile;
@@ -12,7 +12,7 @@ interface UserListItemProps {
 
 export const UserListItem = ({ user, onToggleFollow, hideFollowButton }: UserListItemProps) => {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-surface/50">
       <Avatar src={user.avatarUrl} name={user.displayName} size="lg" onClick={() => navigate(`/profile/${user.username}`)} />

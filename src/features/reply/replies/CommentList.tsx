@@ -1,7 +1,7 @@
 import { CommentItem } from './CommentItem';
 import { EmptyState } from '../../../shared/components/ui/EmptyState';
 import { Skeleton } from '../../../shared/components/ui/Skeleton';
-import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import type { CommentItem as CommentItemType } from '../types/comment.types';
 
 interface CommentListProps {
@@ -11,7 +11,7 @@ interface CommentListProps {
 }
 
 export const CommentList = ({ comments, isLoading, onLike }: CommentListProps) => {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   if (isLoading) {
     return (

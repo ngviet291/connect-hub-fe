@@ -1,4 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeftIcon } from "../shared/components/icons/Icons";
 import { PostCard } from "../features/post/components/PostCard";
 import { PostSkeleton } from "../shared/components/ui/Skeleton";
@@ -7,10 +8,9 @@ import { CommentForm } from "../features/reply/replies/CommentForm";
 import { CommentList } from "../features/reply/replies/CommentList";
 import { usePostDetail } from "../features/post/hooks/usePostDetail";
 import { useComments } from "../features/reply/hooks/useComments";
-import { useLanguage } from "../contexts/LanguageContext";
 
 export const PostDetailPage = () => {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
   const {

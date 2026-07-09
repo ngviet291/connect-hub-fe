@@ -9,10 +9,10 @@ import { TrendingWidget } from '../shared/components/layout/TrendingWidget';
 import { useDebounce } from '../shared/hooks/useDebounce';
 import { userApi } from '../features/user/api/userApi';
 import type { UserProfile } from '../features/user/types/user.types';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 export const SearchPage = () => {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [params] = useSearchParams();
   const [query, setQuery] = useState(params.get('q') ?? '');
   const debounced = useDebounce(query, 350);

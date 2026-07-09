@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useAuth } from '../../features/auth/store/AuthContext';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { Input } from '../../shared/components/ui/Input';
 import { Button } from '../../shared/components/ui/Button';
 
 export const AccountSettingsPage = () => {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [displayName, setDisplayName] = useState(user?.displayName ?? '');
   const [saved, setSaved] = useState(false);
 

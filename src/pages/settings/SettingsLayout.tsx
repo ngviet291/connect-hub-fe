@@ -1,6 +1,6 @@
 import { Link, NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../features/auth/store/AuthContext';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { NotificationDropdown } from '../../features/notification/components/NotificationDropdown';
 import {
   ArrowLeftIcon, LogoIcon, UserIcon, LockIcon, SettingsIcon, ShieldIcon, ChevronRightIcon,
@@ -10,7 +10,7 @@ export const SettingsLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   const items = [
     { to: '/settings/account', label: t('settings_account'), icon: UserIcon },

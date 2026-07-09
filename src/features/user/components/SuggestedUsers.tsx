@@ -4,12 +4,12 @@ import { Avatar } from '../../../shared/components/ui/Avatar';
 import { Button } from '../../../shared/components/ui/Button';
 import { Skeleton } from '../../../shared/components/ui/Skeleton';
 import { userApi } from '../api/userApi';
-import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import type { UserProfile } from '../types/user.types';
 
 export const SuggestedUsers = () => {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [users, setUsers] = useState<UserProfile[] | null>(null);
 
   useEffect(() => {

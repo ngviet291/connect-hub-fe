@@ -8,9 +8,9 @@ import { store } from "../app/store";
 import { logout, setTokens } from "../features/auth/store/authSlice";
 import { authService } from "../features/auth/service/authService";
 import { API_ENDPOINTS } from "./endpoints";
+import { ENV } from "./env";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api/v1";
+const API_BASE_URL = ENV.API_URL;
 
 const axiosClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,

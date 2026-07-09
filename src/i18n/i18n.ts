@@ -23,4 +23,10 @@ i18n.use(initReactI18next).init({
   },
 });
 
+// Tự lưu locale mỗi khi đổi ngôn ngữ (i18n.changeLanguage(...)) — thay cho việc
+// LanguageContext.setLocale() cũ phải tự gọi localStorage.setItem thủ công.
+i18n.on('languageChanged', (lng) => {
+  localStorage.setItem(STORAGE_KEY, lng);
+});
+
 export default i18n;

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
 import { userApi } from "../features/user/api/userApi";
 import type { UserProfile } from "../features/user/types/user.types";
@@ -24,46 +25,45 @@ import {
 } from "../shared/components/icons/Icons";
 import { MOCK_CONVERSATIONS } from "../mocks/mockData";
 import { useAuth } from "../features/auth/store/AuthContext";
-import { useLanguage } from "../contexts/LanguageContext";
 import { useUserPosts } from "../features/post/hooks/useUserPosts";
 import { PostCard } from "../features/post/components/PostCard";
 import { EditProfileModal } from "../features/user/components/EditProfileModal";
 import { CreatePostModal } from "../features/post/components/CreatePostModal";
 
-/* ─── tabs ─────────────────────────────────────────────── */
-const PROFILE_TABS = [
-  { key: "posts", label: "Connect" },
-  { key: "replies", label: "Câu trả lời" },
-  { key: "media", label: "File phương tiện" },
-  { key: "reposts", label: "Bài đăng lại" },
-];
-
-/* ─── completion cards data ─────────────────────────────── */
-const COMPLETION_CARDS = [
-  {
-    key: "create",
-    icon: <CreateConnectIcon size={32} />,
-    title: "Tạo connect",
-    desc: "Chia sẻ suy nghĩ hoạt động nổi bật mới đây của bạn.",
-    cta: "Tạo",
-    action: "compose",
-  },
-  {
-    key: "follow",
-    icon: <FollowSuggestIcon size={32} />,
-    title: "Theo dõi 10 trang cá nhân",
-    desc: "Hãy lấp đầy bằng feed bằng những connect bạn quan tâm.",
-    cta: "Xem trang cá nhân",
-    action: "search",
-  },
-];
+/* ─── tabs & completion cards: định nghĩa bên trong component để dùng được t() ─── */
 
 /* ═══════════════════════════════════════════════════════════ */
 export const ProfilePage = () => {
   const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
   const { user: me } = useAuth();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
+
+  const PROFILE_TABS = [
+    { key: "posts", label: t("profile_tab_posts") },
+    { key: "replies", label: t("profile_tab_replies") },
+    { key: "media", label: t("profile_tab_media") },
+    { key: "reposts", label: t("profile_tab_reposts") },
+  ];
+
+  const COMPLETION_CARDS = [
+    {
+      key: "create",
+      icon: <CreateConnectIcon size={32} />,
+      title: t("profile_completion_create_title"),
+      desc: t("profile_completion_create_desc"),
+      cta: t("profile_completion_create_cta"),
+      action: "compose",
+    },
+    {
+      key: "follow",
+      icon: <FollowSuggestIcon size={32} />,
+      title: t("profile_completion_follow_title"),
+      desc: t("profile_completion_follow_desc"),
+      cta: t("profile_completion_follow_cta"),
+      action: "search",
+    },
+  ];
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loadError, setLoadError] = useState(false);
@@ -249,7 +249,7 @@ export const ProfilePage = () => {
           <button
             onClick={() => navigate(`/profile/${username}/followers`)}
             className="cursor-pointer rounded-lg p-1.5 text-secondary hover:bg-surface-hover hover:text-text"
-            title="Thống kê"
+            title={t('profile_stats_tooltip')}
           >
             <BarChartIcon size={20} />
           </button>
@@ -344,7 +344,7 @@ export const ProfilePage = () => {
         >
           <Avatar src={me?.avatarUrl} name={me?.displayName ?? ""} size="sm" />
           <span className="flex-1 text-sm text-secondary select-none">
-            Có gì mới?
+            {t('profile_whats_new')}
           </span>
           <button
             className="cursor-pointer rounded-xl bg-text px-4 py-1.5 text-sm font-semibold text-background hover:opacity-90 transition-opacity"
@@ -353,7 +353,7 @@ export const ProfilePage = () => {
               setComposeOpen(true);
             }}
           >
-            Đăng
+            {t('post_button')}
           </button>
         </div>
       )}
@@ -366,10 +366,10 @@ export const ProfilePage = () => {
             <div className="px-4 py-4">
               <div className="mb-3 flex items-center justify-between">
                 <span className="text-[13px] font-semibold text-text">
-                  Hoàn tất trang cá nhân
+                  {t('profile_completion_title')}
                 </span>
                 <span className="text-[13px] font-semibold text-text">
-                  Còn {completionLeft}
+                  {t('profile_completion_remaining', { count: completionLeft })}
                 </span>
               </div>
               <div
@@ -441,14 +441,14 @@ export const ProfilePage = () => {
       )}
       {activeTab === "media" && (
         <EmptyState
-          title="Chưa có file phương tiện"
-          description="Ảnh và video sẽ xuất hiện ở đây."
+          title={t("media_empty_title")}
+          description={t("media_empty_desc")}
         />
       )}
       {activeTab === "reposts" && (
         <EmptyState
-          title="Chưa có bài đăng lại"
-          description="Bài đăng lại sẽ xuất hiện ở đây."
+          title={t("reposts_empty_title")}
+          description={t("reposts_empty_desc")}
         />
       )}
 
@@ -456,17 +456,17 @@ export const ProfilePage = () => {
       {isMe && (
         <footer className="mt-8 pb-28 text-center">
           <p className="text-[11px] text-secondary leading-relaxed">
-            © 2026{" "}
+            © {new Date().getFullYear()}{" "}
             <span className="text-primary cursor-pointer hover:underline">
-              Điều khoản của ConnectHub
+              {t('footer_terms')}
             </span>
             {"  "}
             <span className="text-secondary cursor-pointer hover:underline">
-              Chính sách quyền riêng tư
+              {t('footer_privacy')}
             </span>
             <br />
             <span className="text-secondary cursor-pointer hover:underline">
-              Chính sách cookie
+              {t('footer_cookies')}
             </span>
           </p>
         </footer>

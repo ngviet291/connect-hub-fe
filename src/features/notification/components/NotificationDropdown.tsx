@@ -5,7 +5,7 @@ import { Badge } from '../../../shared/components/ui/Badge';
 import { IconButton } from '../../../shared/components/ui/IconButton';
 import { useClickOutside } from '../../../shared/hooks/useClickOutside';
 import { useNotifications } from '../hooks/useNotifications';
-import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { NotificationItem } from './NotificationItem';
 import { Spinner } from '../../../shared/components/ui/Spinner';
 
@@ -13,7 +13,7 @@ export const NotificationDropdown = () => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const { notifications, isLoading, unreadCount, markAsRead, markAllAsRead } = useNotifications();
 
   useClickOutside(ref, () => setOpen(false));

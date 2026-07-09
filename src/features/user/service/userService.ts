@@ -1,9 +1,10 @@
 import axiosClient from "../../../config/axiosClient";
 import { API_ENDPOINTS } from "../../../config/endpoints";
-import type { ApiResponse, PaginationResponse }  from "../../../types/api.type";
+import type { ApiResponse, PaginationResponse } from "../../../types/api.type";
 import { getErrorMessage } from "../../../constants/errorMessage";
 import type { UserProfile } from "../types/user.types";
 import type { UUID } from "../../../shared/types/common.types";
+import i18n from "../../../i18n/i18n";
 
 export const userService = {
   getProfile: async (): Promise<UserProfile> => {
@@ -13,12 +14,12 @@ export const userService = {
       );
       const data = res.data;
       if (data.code !== 7000) {
-        throw new Error(data.message || "Lỗi khi tải thông tin người dùng");
+        throw new Error(data.message || i18n.t("error_load_profile"));
       }
       return data.data;
     } catch (error) {
       throw new Error(
-        getErrorMessage(error, "Lỗi khi tải thông tin người dùng"),
+        getErrorMessage(error, i18n.t("error_load_profile")),
       );
     }
   },
@@ -34,13 +35,13 @@ export const userService = {
       const data = res.data;
       if (data.code !== 7001) {
         throw new Error(
-          data.message || "Lỗi khi cập nhật thông tin người dùng",
+          data.message || i18n.t("error_update_profile"),
         );
       }
       return data.data;
     } catch (error) {
       throw new Error(
-        getErrorMessage(error, "Lỗi khi cập nhật thông tin người dùng"),
+        getErrorMessage(error, i18n.t("error_update_profile")),
       );
     }
   },
@@ -58,13 +59,13 @@ export const userService = {
       );
       const data = res.data;
       if (data.code !== 7002) {
-        throw new Error(data.message || "Lỗi khi tải danh sách người dùng");
+        throw new Error(data.message || i18n.t("error_load_users"));
       }
 
       return data.data;
     } catch (error) {
       throw new Error(
-        getErrorMessage(error, "Lỗi khi tải danh sách người dùng"),
+        getErrorMessage(error, i18n.t("error_load_users")),
       );
     }
   },
@@ -77,7 +78,7 @@ export const userService = {
         );
         const data = res.data;
         if (data.code !== 7003) {
-          throw new Error(data.message || "Lỗi khi khóa người dùng");
+          throw new Error(data.message || i18n.t("error_lock_user"));
         }
       } else {
         const res = await axiosClient.put<ApiResponse<null>>(
@@ -85,11 +86,13 @@ export const userService = {
         );
         const data = res.data;
         if (data.code !== 7004) {
-          throw new Error(data.message || "Lỗi khi mở khóa người dùng");
+          throw new Error(data.message || i18n.t("error_unlock_user"));
         }
       }
     } catch (error) {
-      throw new Error(getErrorMessage(error, "Lỗi khi khóa người dùng"));
+      throw new Error(
+        getErrorMessage(error, isLock ? i18n.t("error_lock_user") : i18n.t("error_unlock_user")),
+      );
     }
   },
 };

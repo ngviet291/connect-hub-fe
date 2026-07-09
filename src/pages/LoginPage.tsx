@@ -1,14 +1,14 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/store/AuthContext';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../shared/components/ui/Button';
 import { Input } from '../shared/components/ui/Input';
 import { LogoIcon } from '../shared/components/icons/Icons';
 
 export const LoginPage = () => {
   const { login } = useAuth();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -23,7 +23,7 @@ export const LoginPage = () => {
       await login({ emailOrUsername, password });
       navigate('/');
     } catch {
-      setError('Tên người dùng/email hoặc mật khẩu không đúng.');
+      setError(t('login_invalid_credentials'));
     } finally {
       setLoading(false);
     }
@@ -40,7 +40,7 @@ export const LoginPage = () => {
           </div>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 rounded-2xl border border-border bg-surface p-6">
-          <Input label={t('login_identifier')} type="text" placeholder="you@example.com hoặc @username" value={emailOrUsername} onChange={(e) => setEmailOrUsername(e.target.value)} required autoFocus />
+          <Input label={t('login_identifier')} type="text" placeholder={t('login_identifier_placeholder')} value={emailOrUsername} onChange={(e) => setEmailOrUsername(e.target.value)} required autoFocus />
           <div>
             <Input label={t('password')} type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
             <Link to="/forgot-password" className="mt-1.5 inline-block text-xs font-medium text-primary hover:underline">

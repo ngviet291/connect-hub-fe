@@ -4,11 +4,11 @@ import { EmptyState } from '../../../shared/components/ui/EmptyState';
 import { ErrorState } from '../../../shared/components/ui/ErrorState';
 import { Spinner } from '../../../shared/components/ui/Spinner';
 import { useInfiniteScroll } from '../../../shared/hooks/useInfiniteScroll';
-import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { useFeed } from '../hooks/useFeed';
 
 export const PostList = () => {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const { posts, isLoading, error, hasNext, loadMore, toggleLike, toggleRepost, toggleBookmark, removePost, refresh } = useFeed();
   const sentinelRef = useInfiniteScroll<HTMLDivElement>({ hasMore: hasNext, isLoading, onLoadMore: loadMore });
 

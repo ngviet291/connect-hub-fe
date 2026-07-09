@@ -2,12 +2,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { LogoIcon } from '../icons/Icons';
 import { NotificationDropdown } from '../../../features/notification/components/NotificationDropdown';
 import { useAuth } from '../../../features/auth/store/AuthContext';
-import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 export const Navbar = () => {
   const { user } = useAuth();
   const location = useLocation();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   const TITLES: Record<string, string> = {
     '/': t('nav_home'),

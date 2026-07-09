@@ -4,11 +4,11 @@ import { UserRowSkeleton } from '../../../shared/components/ui/Skeleton';
 import { EmptyState } from '../../../shared/components/ui/EmptyState';
 import { useTimeAgo } from '../../../shared/utils/date';
 import { useConversations } from '../hooks/useConversations';
-import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { MailIcon } from '../../../shared/components/icons/Icons';
 
 export const ConversationList = () => {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const timeAgo = useTimeAgo();
   const { conversations, isLoading } = useConversations();
   const { conversationId } = useParams<{ conversationId: string }>();

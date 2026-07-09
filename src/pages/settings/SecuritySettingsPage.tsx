@@ -2,10 +2,10 @@ import { useState, type FormEvent } from 'react';
 import { Input } from '../../shared/components/ui/Input';
 import { Button } from '../../shared/components/ui/Button';
 import { Toggle } from '../../shared/components/ui/Toggle';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 export const SecuritySettingsPage = () => {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [form, setForm] = useState({ current: '', next: '', confirm: '' });
   const [twoFactor, setTwoFactor] = useState(false);
   const [saved, setSaved] = useState(false);

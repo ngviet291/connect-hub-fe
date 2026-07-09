@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Avatar } from "../../../shared/components/ui/Avatar";
 import { Button } from "../../../shared/components/ui/Button";
 import { Modal } from "../../../shared/components/ui/Modal";
@@ -9,7 +10,6 @@ import {
   XIcon,
 } from "../../../shared/components/icons/Icons";
 import { useAuth } from "../../auth/store/AuthContext";
-import { useLanguage } from "../../../contexts/LanguageContext";
 import { POST_MAX_LENGTH } from "../../../constants/limits";
 import { mediaService } from "../../media/mediaService";
 import type { Post, PostMedia } from "../types/post.types";
@@ -27,7 +27,7 @@ export const CreatePostModal = ({
   onCreated,
 }: CreatePostModalProps) => {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [content, setContent] = useState("");
   const [media, setMedia] = useState<PostMedia[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);

@@ -3,10 +3,10 @@ import { PostSkeleton } from '../shared/components/ui/Skeleton';
 import { EmptyState } from '../shared/components/ui/EmptyState';
 import { BookmarkIcon } from '../shared/components/icons/Icons';
 import { useBookmarks } from '../features/post/hooks/useBookmarks';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 export const BookmarksPage = () => {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const { posts, isLoading, toggleLike, toggleRepost, toggleBookmark, removePost } = useBookmarks();
 
   return (

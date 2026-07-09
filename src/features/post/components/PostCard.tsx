@@ -5,7 +5,7 @@ import { Dropdown } from '../../../shared/components/ui/Dropdown';
 import { HeartIcon, CommentIcon, RepostIcon, ShareIcon, BookmarkIcon, MoreHorizontalIcon } from '../../../shared/components/icons/Icons';
 import { useTimeAgo } from '../../../shared/utils/date';
 import { useAuth } from '../../auth/store/AuthContext';
-import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import type { Post } from '../types/post.types';
 import { MediaGrid } from './MediaGrid';
 
@@ -21,7 +21,7 @@ interface PostCardProps {
 export const PostCard = ({ post, onLike, onRepost, onBookmark, onDelete, clickable = true }: PostCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const timeAgo = useTimeAgo();
   const isOwner = user?.username === post.user.username;
 

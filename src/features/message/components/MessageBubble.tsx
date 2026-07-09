@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/store/AuthContext';
-import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import type { ChatMessage } from '../types/message.types';
 import type { PostAuthor } from '../../post/types/post.types';
 import { CommentIcon, SmileIcon, MoreHorizontalIcon } from '../../../shared/components/icons/Icons';
@@ -27,7 +27,7 @@ export const MessageBubble = ({
   onReact: (messageId: string, emoji: string) => void;
 }) => {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [showReactions, setShowReactions] = useState(false);
   const [confirmRecall, setConfirmRecall] = useState(false);

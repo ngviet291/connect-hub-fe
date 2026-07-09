@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Toggle } from '../../shared/components/ui/Toggle';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 const Row = ({ title, description, checked, onChange }: { title: string; description: string; checked: boolean; onChange: (v: boolean) => void }) => (
   <div className="flex items-center justify-between gap-4 border-b border-border py-4 last:border-0">
@@ -13,7 +13,7 @@ const Row = ({ title, description, checked, onChange }: { title: string; descrip
 );
 
 export const PrivacySettingsPage = () => {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [state, setState] = useState({
     privateAccount: false,
     hideActivity: false,

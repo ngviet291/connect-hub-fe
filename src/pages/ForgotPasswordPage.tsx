@@ -1,13 +1,13 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { authApi } from '../features/auth/api/authApi';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../shared/components/ui/Button';
 import { Input } from '../shared/components/ui/Input';
 import { LogoIcon, ArrowLeftIcon } from '../shared/components/icons/Icons';
 
 export const ForgotPasswordPage = () => {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);

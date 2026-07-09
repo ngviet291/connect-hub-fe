@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useAuth } from '../../auth/store/AuthContext';
-import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { Avatar } from '../../../shared/components/ui/Avatar';
 import type { Post } from '../types/post.types';
 import { CreatePostModal } from './CreatePostModal';
 
 export const PostForm = ({ onCreated }: { onCreated?: (p: Post) => void }) => {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   if (!user) return null;

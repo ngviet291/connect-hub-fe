@@ -1,19 +1,17 @@
 import { useTheme } from '../../contexts/ThemeContext';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
+import { SUPPORTED_LOCALES } from '../../i18n/locales';
+import type { Locale } from '../../i18n/translations';
 import { SunIcon, MoonIcon } from '../../shared/components/icons/Icons';
 
 export const ThemeSettingsPage = () => {
-  const { theme, setTheme }   = useTheme();
-  const { locale, setLocale, t } = useLanguage();
+  const { theme, setTheme } = useTheme();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language as Locale;
 
   const themeOptions = [
     { value: 'light' as const, label: t('theme_light'), icon: SunIcon, bg: 'bg-white',  text: 'text-black' },
     { value: 'dark'  as const, label: t('theme_dark'),  icon: MoonIcon, bg: 'bg-black', text: 'text-white' },
-  ];
-
-  const langOptions = [
-    { value: 'vi' as const, flag: '🇻🇳', label: 'Tiếng Việt' },
-    { value: 'en' as const, flag: '🇬🇧', label: 'English' },
   ];
 
   return (
@@ -54,10 +52,10 @@ export const ThemeSettingsPage = () => {
         <p className="mb-4 text-sm text-secondary">
 {t('language_desc')}</p>
         <div className="flex flex-col gap-2">
-          {langOptions.map((opt) => (
+          {SUPPORTED_LOCALES.map((opt) => (
             <button
               key={opt.value}
-              onClick={() => setLocale(opt.value)}
+              onClick={() => i18n.changeLanguage(opt.value)}
               className={`flex cursor-pointer items-center justify-between rounded-2xl border-2 px-4 py-3 transition-all ${
                 locale === opt.value
                   ? 'border-primary bg-primary/5'

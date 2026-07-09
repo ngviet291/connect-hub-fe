@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { IconButton } from '../../../shared/components/ui/IconButton';
-import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { SendIcon, ImageIcon, XIcon } from '../../../shared/components/icons/Icons';
 import { createAttachment, revokeAttachment } from '../utils/attachment';
 import type { ChatMessage, MessageAttachment } from '../types/message.types';
@@ -18,7 +18,7 @@ export const MessageInput = ({
   replyingTo?: ChatMessage | null;
   onCancelReply?: () => void;
 }) => {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [value, setValue] = useState('');
   const [media, setMedia] = useState<MessageAttachment[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);

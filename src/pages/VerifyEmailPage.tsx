@@ -2,13 +2,13 @@ import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../features/auth/api/authApi';
 import { useAuth } from '../features/auth/store/AuthContext';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../shared/components/ui/Button';
 import { LogoIcon, MailIcon } from '../shared/components/icons/Icons';
 
 export const VerifyEmailPage = () => {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [digits, setDigits] = useState<string[]>(Array(6).fill(''));
   const [loading, setLoading] = useState(false);

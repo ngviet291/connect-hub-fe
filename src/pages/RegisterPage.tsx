@@ -1,16 +1,16 @@
 import { useState, type FormEvent, type ChangeEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/store/AuthContext';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../shared/components/ui/Button';
 import { Input } from '../shared/components/ui/Input';
 import { LogoIcon } from '../shared/components/icons/Icons';
 
 export const RegisterPage = () => {
   const { register } = useAuth();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ username: '', email: '', password: '' });
+  const [form, setForm] = useState({ username: '', email: '', password: '', confirmPassword: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -21,15 +21,20 @@ export const RegisterPage = () => {
     e.preventDefault();
     setError('');
     if (form.password.length < 6) {
-      setError('Mật khẩu phải có ít nhất 6 ký tự.');
+      setError(t('register_password_too_short'));
+      return;
+    }
+    if (form.password !== form.confirmPassword) {
+      setError(t('register_password_mismatch'));
       return;
     }
     setLoading(true);
     try {
-      await register(form);
+      const { username, email, password } = form;
+      await register({ username, email, password });
       navigate('/verify-email');
     } catch {
-      setError('Đăng ký thất bại. Vui lòng thử lại.');
+      setError(t('register_failed_retry'));
     } finally {
       setLoading(false);
     }
@@ -49,6 +54,7 @@ export const RegisterPage = () => {
           <Input label={t('username')} placeholder="username" value={form.username} onChange={set('username')} required />
           <Input label={t('email')} type="email" placeholder="you@example.com" value={form.email} onChange={set('email')} required />
           <Input label={t('password')} type="password" placeholder="••••••••" value={form.password} onChange={set('password')} required />
+          <Input label={t('register_confirm_password')} type="password" placeholder="••••••••" value={form.confirmPassword} onChange={set('confirmPassword')} required />
           {error && <p className="text-sm text-danger">{error}</p>}
           <Button type="submit" loading={loading} fullWidth size="lg">
             {t('register_submit')}

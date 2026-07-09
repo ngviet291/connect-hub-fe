@@ -2,6 +2,7 @@ import axiosClient from "../../../config/axiosClient";
 import { API_ENDPOINTS } from "../../../config/endpoints";
 import type { ApiResponse } from "../../../types/api.type";
 import { getErrorMessage } from "../../../constants/errorMessage";
+import i18n from "../../../i18n/i18n";
 
 export interface LoginRequest {
   email: string;
@@ -38,7 +39,7 @@ export const authService = {
 
       return data.data;
     } catch (error) {
-      throw new Error(getErrorMessage(error, "Đăng nhập thất bại"));
+      throw new Error(getErrorMessage(error, i18n.t("error_login_failed")));
     }
   },
 
@@ -53,7 +54,7 @@ export const authService = {
         throw new Error(res.data.message);
       }
     } catch (error) {
-      throw new Error(getErrorMessage(error, "Đăng ký thất bại"));
+      throw new Error(getErrorMessage(error, i18n.t("error_register_failed")));
     }
   },
 
