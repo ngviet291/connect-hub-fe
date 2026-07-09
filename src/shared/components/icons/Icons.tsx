@@ -53,7 +53,7 @@ export const HeartIcon = ({ filled, size = 24, ...p }: IconProps) => (
   </svg>
 );
 
-export const CommentIcon = ({ size = 24, ...p }: IconProps) => (
+export const ReplyIcon = ({ size = 24, ...p }: IconProps) => (
   <svg {...base(size)} {...p}>
     <path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-5.1A8.5 8.5 0 1 1 21 11.5Z" />
   </svg>

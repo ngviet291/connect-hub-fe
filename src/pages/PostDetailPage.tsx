@@ -4,10 +4,10 @@ import { ArrowLeftIcon } from "../shared/components/icons/Icons";
 import { PostCard } from "../features/post/components/PostCard";
 import { PostSkeleton } from "../shared/components/ui/Skeleton";
 import { ErrorState } from "../shared/components/ui/ErrorState";
-import { CommentForm } from "../features/reply/replies/CommentForm";
-import { CommentList } from "../features/reply/replies/CommentList";
+import { ReplyForm } from "../features/reply/replies/ReplyForm";
+import { ReplyList } from "../features/reply/replies/ReplyList";
 import { usePostDetail } from "../features/post/hooks/usePostDetail";
-import { useComments } from "../features/reply/hooks/useComments";
+import { useReplies } from "../features/reply/hooks/useReplies";
 
 export const PostDetailPage = () => {
   const { t } = useTranslation();
@@ -23,11 +23,11 @@ export const PostDetailPage = () => {
     refetch,
   } = usePostDetail(postId);
   const {
-    comments,
-    isLoading: commentsLoading,
-    addComment,
-    toggleLike: toggleCommentLike,
-  } = useComments(postId);
+    replies,
+    isLoading: repliesLoading,
+    addReply,
+    toggleLike: toggleReplyLike,
+  } = useReplies(postId);
 
   return (
     <div className="animate-fade-in">
@@ -58,11 +58,11 @@ export const PostDetailPage = () => {
         />
       )}
 
-      <CommentForm onSubmit={addComment} />
-      <CommentList
-        comments={comments}
-        isLoading={commentsLoading}
-        onLike={toggleCommentLike}
+      <ReplyForm onSubmit={addReply} />
+      <ReplyList
+        replies={replies}
+        isLoading={repliesLoading}
+        onLike={toggleReplyLike}
       />
     </div>
   );

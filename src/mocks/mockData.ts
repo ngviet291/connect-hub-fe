@@ -1,7 +1,7 @@
 import type { AuthUser } from '../features/auth/types/auth.types';
 import type { Post } from '../features/post/types/post.types';
 import type { UserProfile } from '../features/user/types/user.types';
-import type { CommentItem } from '../features/reply/types/comment.types';
+import type { ReplyItem } from '../features/reply/types/reply.types';
 import type { AppNotification } from '../features/notification/types/notification.types';
 import type { Conversation, ChatMessage } from '../features/message/types/message.types';
 
@@ -91,7 +91,7 @@ export const MOCK_POSTS: Post[] = [
     createdAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
     user: { id: 'user-001', username: 'as_dev', displayName: 'As Dev' },
     likeCount: 12,
-    commentCount: 3,
+    replyCount: 3,
     repostCount: 1,
     isLiked: false,
     isReposted: false,
@@ -105,7 +105,7 @@ export const MOCK_POSTS: Post[] = [
     user: { id: 'user-002', username: 'jane_doe', displayName: 'Jane Doe' },
     media: [{ id: 'm1', type: 'IMAGE', url: 'https://images.unsplash.com/photo-1551650975-87deedd944c3?w=900&q=80' }],
     likeCount: 25,
-    commentCount: 7,
+    replyCount: 7,
     repostCount: 4,
     isLiked: true,
     isReposted: false,
@@ -118,7 +118,7 @@ export const MOCK_POSTS: Post[] = [
     createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     user: { id: 'user-003', username: 'john_smith', displayName: 'John Smith' },
     likeCount: 8,
-    commentCount: 2,
+    replyCount: 2,
     repostCount: 0,
     isLiked: false,
     isReposted: false,
@@ -131,7 +131,7 @@ export const MOCK_POSTS: Post[] = [
     createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
     user: { id: 'user-001', username: 'as_dev', displayName: 'As Dev' },
     likeCount: 19,
-    commentCount: 5,
+    replyCount: 5,
     repostCount: 2,
     isLiked: false,
     isReposted: true,
@@ -148,7 +148,7 @@ export const MOCK_POSTS: Post[] = [
       { id: 'm3', type: 'IMAGE', url: 'https://images.unsplash.com/photo-1618172193763-c511deb635ca?w=900&q=80' },
     ],
     likeCount: 41,
-    commentCount: 11,
+    replyCount: 11,
     repostCount: 6,
     isLiked: false,
     isReposted: false,
@@ -161,7 +161,7 @@ export const MOCK_POSTS: Post[] = [
     createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
     user: { id: 'user-005', username: 'minh.nguyen', displayName: 'Minh Nguyễn' },
     likeCount: 63,
-    commentCount: 14,
+    replyCount: 14,
     repostCount: 9,
     isLiked: true,
     isReposted: false,
@@ -169,7 +169,7 @@ export const MOCK_POSTS: Post[] = [
   },
 ];
 
-export const MOCK_COMMENTS: Record<string, CommentItem[]> = {
+export const MOCK_REPLIES: Record<string, ReplyItem[]> = {
   'post-001': [
     {
       id: 'c1',
@@ -212,7 +212,7 @@ export const MOCK_NOTIFICATIONS: AppNotification[] = [
   },
   {
     id: 'n2',
-    type: 'COMMENT',
+    type: 'REPLY',
     message: 'đã bình luận về bài viết của bạn',
     isRead: false,
     createdAt: new Date(Date.now() - 20 * 60 * 1000).toISOString(),

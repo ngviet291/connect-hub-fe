@@ -21,7 +21,7 @@ export interface Post {
   user: PostAuthor;
   media?: PostMedia[];
   likeCount: number;
-  commentCount: number;
+  replyCount: number;
   repostCount: number;
   isLiked: boolean;
   isReposted: boolean;

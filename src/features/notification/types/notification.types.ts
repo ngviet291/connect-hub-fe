@@ -1,7 +1,7 @@
 import type { UUID } from '../../../shared/types/common.types';
 import type { PostAuthor } from '../../post/types/post.types';
 
-export type NotificationType = 'LIKE' | 'COMMENT' | 'FOLLOW' | 'REPOST' | 'MENTION';
+export type NotificationType = 'LIKE' | 'REPLY' | 'FOLLOW' | 'REPOST' | 'MENTION';
 
 export interface AppNotification {
   id: UUID;

@@ -49,7 +49,7 @@ export const postApi = {
       user: { id: 'user-001', username: 'as_dev', displayName: 'As Dev' },
       media: data.media,
       likeCount: 0,
-      commentCount: 0,
+      replyCount: 0,
       repostCount: 0,
       isLiked: false,
       isReposted: false,

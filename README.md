@@ -11,7 +11,7 @@ npm run dev
 
 Ứng dụng chạy tại `http://localhost:5173`.
 
-> Toàn bộ dữ liệu hiện đang dùng **mock API** (trong `src/features/*/api` và `src/mocks/mockData.ts`) với độ trễ giả lập, để bạn có thể chạy và xem UI ngay cả khi backend chưa sẵn sàng. Mỗi hàm mock đều có comment `// TODO: thay bằng api.xxx(...)` chỉ rõ cách nối vào REST API thật (đã cấu hình sẵn `axios` instance tại `src/config/axios.ts`, tự đính kèm Bearer token).
+> Toàn bộ dữ liệu hiện đang dùng **mock API** (trong `src/features/*/api` và `src/mocks/mockData.ts`) với độ trễ giả lập, để bạn có thể chạy và xem UI ngay cả khi backend chưa sẵn sàng. Mỗi hàm mock đều có reply `// TODO: thay bằng api.xxx(...)` chỉ rõ cách nối vào REST API thật (đã cấu hình sẵn `axios` instance tại `src/config/axios.ts`, tự đính kèm Bearer token).
 
 ## Tech stack
 
@@ -33,7 +33,7 @@ src/
   features/
     auth/              # login/register/forgot-password/verify-email
     post/              # feed, composer, post card, media grid, hooks
-    comment/           # bình luận
+    reply/           # Trả lời
     user/              # profile, follow, suggested users
     notification/      # thông báo
     message/           # nhắn tin (conversations + chat)
@@ -54,7 +54,7 @@ src/
 ## Tính năng đã hoàn thiện
 
 - **Auth**: đăng nhập, đăng ký, quên mật khẩu, xác thực email (form OTP 6 số)
-- **Feed**: infinite scroll, tạo bài viết (text/ảnh/video), like, comment, repost, bookmark, share (UI), trang chi tiết bài viết + bình luận
+- **Feed**: infinite scroll, tạo bài viết (text/ảnh/video), like, reply, repost, bookmark, share (UI), trang chi tiết bài viết + bình luận
 - **Người dùng**: trang cá nhân, chỉnh sửa hồ sơ, danh sách followers/following, tìm kiếm người dùng, gợi ý theo dõi
 - **Thông báo**: trang thông báo, dropdown thông báo trên navbar, badge số chưa đọc
 - **Nhắn tin**: danh sách hội thoại, màn hình chat, UI sẵn sàng nối realtime (WebSocket) sau này

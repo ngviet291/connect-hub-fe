@@ -1,7 +1,7 @@
 import type { UUID } from '../../../shared/types/common.types';
 import type { PostAuthor } from '../../post/types/post.types';
 
-export interface CommentItem {
+export interface ReplyItem {
   id: UUID;
   postId: UUID;
   content: string;
@@ -11,7 +11,7 @@ export interface CommentItem {
   isLiked: boolean;
 }
 
-export interface CreateCommentRequest {
+export interface CreateReplyRequest {
   postId: UUID;
   content: string;
 }

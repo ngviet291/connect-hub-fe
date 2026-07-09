@@ -81,8 +81,8 @@ export const translations = {
     posts_count_suffix: 'bài viết',
     user_not_found: 'Không tìm thấy người dùng.',
     reply_placeholder: 'Trả lời...',
-    comment_empty_title: 'Chưa có bình luận nào',
-    comment_empty_desc: 'Hãy là người đầu tiên bình luận.',
+    reply_empty_title: 'Chưa có trả lời nào',
+    reply_empty_desc: 'Hãy là người đầu tiên trả lời.',
 
     // Trang cá nhân
     posts_tab: 'Bài viết',
@@ -321,8 +321,8 @@ export const translations = {
     posts_count_suffix: 'posts',
     user_not_found: 'User not found.',
     reply_placeholder: 'Reply...',
-    comment_empty_title: 'No comments yet',
-    comment_empty_desc: 'Be the first to comment.',
+    reply_empty_title: 'No replies yet',
+    reply_empty_desc: 'Be the first to reply.',
 
     posts_tab: 'Posts',
     replies_tab: 'Replies',
