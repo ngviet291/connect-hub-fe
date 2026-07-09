@@ -114,8 +114,8 @@ export const LeftSidebar = () => {
           onClick={() => navigate(`/profile/${user.username}`)}
           className="mt-1 flex cursor-pointer items-center gap-3 rounded-full px-2 py-2 hover:bg-surface-hover lg:px-3"
         >
-          <Avatar src={user.avatarUrl} name={user.displayName} size="sm" />
-          <span className="hidden truncate text-sm font-medium text-text lg:inline">{user.displayName}</span>
+          <Avatar src={user.avatarUrl} name={user.fullName} size="sm" />
+          <span className="hidden truncate text-sm font-medium text-text lg:inline">{user.fullName}</span>
         </button>
       </div>
 

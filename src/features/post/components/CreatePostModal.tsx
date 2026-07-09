@@ -81,7 +81,7 @@ export const CreatePostModal = ({
     <Modal isOpen={isOpen} onClose={handleClose} title={t("nav_create")}>
       <div className="p-4">
         <div className="flex gap-3">
-          <Avatar src={user.avatarUrl} name={user.displayName} />
+          <Avatar src={user.avatarUrl} name={user.fullName} />
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-text">{user.username}</p>
             <Textarea

@@ -57,7 +57,7 @@ export const MessageBubble = ({
         {!isMine && (
           <Avatar
             src={participant.avatarUrl}
-            name={participant.displayName}
+            name={participant.fullName}
             size="xs"
             onClick={goToProfile}
           />
@@ -76,7 +76,7 @@ export const MessageBubble = ({
       {!isMine && (
         <Avatar
           src={participant.avatarUrl}
-          name={participant.displayName}
+          name={participant.fullName}
           size="xs"
           onClick={goToProfile}
         />

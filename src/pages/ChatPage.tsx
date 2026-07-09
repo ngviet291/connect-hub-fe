@@ -16,7 +16,7 @@ export const ChatPage = () => {
   const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const conversation = MOCK_CONVERSATIONS.find((c) => c.id === conversationId);
-  const participant = conversation?.participant ?? { id: '', username: '', displayName: '?' };
+  const participant = conversation?.participant ?? { id: '', username: '', fullName: '?' };
 
   const messageById = useMemo(() => new Map(messages.map((m) => [m.id, m])), [messages]);
 
@@ -40,9 +40,9 @@ export const ChatPage = () => {
             onClick={() => navigate(`/profile/${conversation.participant.username}`)}
             className="flex cursor-pointer items-center gap-3 text-left"
           >
-            <Avatar src={conversation.participant.avatarUrl} name={conversation.participant.displayName} size="sm" />
+            <Avatar src={conversation.participant.avatarUrl} name={conversation.participant.fullName} size="sm" />
             <div>
-              <p className="font-semibold text-text">{conversation.participant.displayName}</p>
+              <p className="font-semibold text-text">{conversation.participant.fullName}</p>
               <p className="text-xs text-secondary">@{conversation.participant.username}</p>
             </div>
           </button>

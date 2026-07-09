@@ -30,7 +30,7 @@ export const ReplyForm = ({
 
   return (
     <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-      <Avatar src={user.avatarUrl} name={user.displayName} size="sm" />
+      <Avatar src={user.avatarUrl} name={user.fullName} size="sm" />
       <input
         value={content}
         onChange={(e) => setContent(e.target.value.slice(0, REPLY_MAX_LENGTH))}

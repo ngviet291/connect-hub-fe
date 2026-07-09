@@ -18,7 +18,7 @@ export const PostForm = ({ onCreated }: { onCreated?: (p: Post) => void }) => {
         onClick={() => setOpen(true)}
         className="flex cursor-text items-center gap-3 border-b border-border px-4 py-3.5 transition-colors hover:bg-surface/50"
       >
-        <Avatar src={user.avatarUrl} name={user.displayName} />
+        <Avatar src={user.avatarUrl} name={user.fullName} />
         <span className="flex-1 text-[15px] text-secondary">{t('composer_placeholder')}</span>
         <span className="pointer-events-none rounded-full bg-primary px-4 py-1.5 text-sm font-semibold text-white opacity-90">
           {t('post_button')}

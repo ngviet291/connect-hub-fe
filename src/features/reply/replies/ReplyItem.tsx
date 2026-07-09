@@ -17,7 +17,7 @@ export const ReplyItem = ({
     <div className="flex gap-3 border-b border-border px-4 py-3.5 animate-fade-in">
       <Avatar
         src={reply.user.avatarUrl}
-        name={reply.user.displayName}
+        name={reply.user.fullName}
         size="sm"
         onClick={() => navigate(`/profile/${reply.user.username}`)}
       />
@@ -27,7 +27,7 @@ export const ReplyItem = ({
             className="cursor-pointer font-semibold text-text hover:underline"
             onClick={() => navigate(`/profile/${reply.user.username}`)}
           >
-            {reply.user.displayName}
+            {reply.user.fullName}
           </span>
           <span className="text-secondary">{timeAgo(reply.createdAt)}</span>
         </div>

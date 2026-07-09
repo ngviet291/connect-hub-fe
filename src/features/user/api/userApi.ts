@@ -49,7 +49,7 @@ export const userApi = {
     // TODO: thay bằng api.get('/users/search', { params: { q: query } }).then(r => r.data)
     const q = query.trim().toLowerCase();
     if (!q) return [];
-    return store.filter((u) => u.username.toLowerCase().includes(q) || u.displayName.toLowerCase().includes(q));
+    return store.filter((u) => u.username.toLowerCase().includes(q) || u.fullName.toLowerCase().includes(q));
   },
 
   getSuggested: async (): Promise<UserProfile[]> => {

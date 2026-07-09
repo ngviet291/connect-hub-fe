@@ -7,7 +7,7 @@ import { Button } from '../../shared/components/ui/Button';
 export const AccountSettingsPage = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
-  const [displayName, setDisplayName] = useState(user?.displayName ?? '');
+  const [fullName, setFullName] = useState(user?.fullName ?? '');
   const [saved, setSaved] = useState(false);
 
   return (
@@ -16,7 +16,7 @@ export const AccountSettingsPage = () => {
         <h2 className="mb-1 text-base font-semibold text-text">{t('account_info_title')}</h2>
         <p className="text-sm text-secondary">{t('account_info_desc')}</p>
       </div>
-      <Input label={t('display_name')} value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+      <Input label={t('display_name')} value={fullName} onChange={(e) => setFullName(e.target.value)} />
       <Input label={t('email')} value={user?.email ?? ''} disabled />
       <Input label={t('username')} value={`@${user?.username ?? ''}`} disabled />
       <div>

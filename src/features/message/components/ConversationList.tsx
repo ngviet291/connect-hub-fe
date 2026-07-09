@@ -36,10 +36,10 @@ export const ConversationList = () => {
           onClick={() => navigate(`/messages/${c.id}`)}
           className={`flex cursor-pointer items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-surface/60 ${conversationId === c.id ? 'bg-surface' : ''}`}
         >
-          <Avatar src={c.participant.avatarUrl} name={c.participant.displayName} size="lg" />
+          <Avatar src={c.participant.avatarUrl} name={c.participant.fullName} size="lg" />
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between gap-2">
-              <p className="truncate font-semibold text-text">{c.participant.displayName}</p>
+              <p className="truncate font-semibold text-text">{c.participant.fullName}</p>
               <span className="shrink-0 text-xs text-secondary">{timeAgo(c.lastMessageAt)}</span>
             </div>
             <p className={`truncate text-sm ${c.unreadCount > 0 ? 'font-medium text-text' : 'text-secondary'}`}>{c.lastMessage}</p>

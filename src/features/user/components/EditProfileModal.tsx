@@ -19,7 +19,7 @@ interface EditProfileModalProps {
 export const EditProfileModal = ({ isOpen, onClose, profile, onSaved }: EditProfileModalProps) => {
   const { t } = useTranslation();
   const [form, setForm] = useState<UpdateProfileRequest>({
-    displayName: profile.displayName,
+    fullName: profile.fullName,
     bio: profile.bio ?? '',
     website: profile.website ?? '',
     location: profile.location ?? '',
@@ -45,10 +45,10 @@ export const EditProfileModal = ({ isOpen, onClose, profile, onSaved }: EditProf
     <Modal isOpen={isOpen} onClose={onClose} title={t('edit_profile_title')}>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-4">
         <div className="flex items-center gap-4">
-          <Avatar src={profile.avatarUrl} name={profile.displayName} size="lg" />
+          <Avatar src={profile.avatarUrl} name={profile.fullName} size="lg" />
           <Button type="button" variant="outline" size="sm">{t('change_avatar')}</Button>
         </div>
-        <Input label={t('display_name')} value={form.displayName} onChange={set('displayName')} maxLength={50} required />
+        <Input label={t('display_name')} value={form.fullName} onChange={set('fullName')} maxLength={50} required />
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium text-secondary">{t('bio')}</label>
           <Textarea

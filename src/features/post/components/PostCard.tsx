@@ -57,7 +57,7 @@ export const PostCard = ({
       <div className="flex gap-3">
         <Avatar
           src={post.user.avatarUrl}
-          name={post.user.displayName}
+          name={post.user.fullName}
           onClick={goToProfile}
         />
         <div className="min-w-0 flex-1">
@@ -67,7 +67,7 @@ export const PostCard = ({
                 onClick={goToProfile}
                 className="cursor-pointer font-semibold text-text hover:underline"
               >
-                {post.user.displayName}
+                {post.user.fullName}
               </span>
               <span className="text-secondary">@{post.user.username}</span>
               <span className="text-secondary">·</span>

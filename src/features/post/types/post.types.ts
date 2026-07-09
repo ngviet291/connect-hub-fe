@@ -3,7 +3,7 @@ import type { UUID, Visibility } from '../../../shared/types/common.types';
 export interface PostAuthor {
   id: UUID;
   username: string;
-  displayName: string;
+  fullName: string;
   avatarUrl?: string;
 }
 

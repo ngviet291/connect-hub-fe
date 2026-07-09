@@ -1,9 +1,9 @@
 import type { UUID } from '../../../shared/types/common.types';
-export type UserRole = "ROLE_USER" | "ROLE_ADMIN";
+export type UserRole = "ROLE_USER" | "ROLE_ADMIN"|"ROLE_MODERATOR";
 export interface UserProfile {
   id: UUID;
   username: string;
-  displayName: string;
+  fullName: string;
   bio?: string;
   avatarUrl?: string;
   coverUrl?: string;
@@ -20,7 +20,7 @@ export interface UserProfile {
 }
 
 export interface UpdateProfileRequest {
-  displayName?: string;
+  fullName?: string;
   bio?: string;
   website?: string;
   location?: string;

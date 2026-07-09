@@ -46,7 +46,7 @@ export const postApi = {
       content: data.content,
       visibility: data.visibility ?? 'PUBLIC',
       createdAt: new Date().toISOString(),
-      user: { id: 'user-001', username: 'as_dev', displayName: 'As Dev' },
+      user: { id: 'user-001', username: 'as_dev', fullName: 'As Dev' },
       media: data.media,
       likeCount: 0,
       replyCount: 0,

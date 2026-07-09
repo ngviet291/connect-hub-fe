@@ -20,10 +20,10 @@ export const NotificationItem = ({ notification, onRead }: { notification: AppNo
       className={`flex w-full cursor-pointer items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-surface/60 ${!notification.isRead ? 'bg-primary/[0.05]' : ''}`}
     >
       <NotificationIcon type={notification.type} />
-      <Avatar src={notification.actor.avatarUrl} name={notification.actor.displayName} size="sm" />
+      <Avatar src={notification.actor.avatarUrl} name={notification.actor.fullName} size="sm" />
       <div className="min-w-0 flex-1">
         <p className="text-sm text-text">
-          <span className="font-semibold">{notification.actor.displayName}</span> {notification.message}
+          <span className="font-semibold">{notification.actor.fullName}</span> {notification.message}
         </p>
         <p className="mt-0.5 text-xs text-secondary">{timeAgo(notification.createdAt)}</p>
       </div>

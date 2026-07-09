@@ -1,55 +1,62 @@
-import { MOCK_USER } from '../../../mocks/mockData';
+import axiosClient from '../../../config/axiosClient';
+import { API_ENDPOINTS } from '../../../config/endpoints';
 import type {
   AuthResponse,
   ForgotPasswordRequest,
   LoginRequest,
+  LogoutRequest,
   RegisterRequest,
   ResetPasswordRequest,
   VerifyEmailRequest,
 } from '../types/auth.types';
 
-const delay = (ms = 500) => new Promise((r) => setTimeout(r, ms));
+/** Shape wrapper backend trả về: ApiResponse<T> = { code, data, message } */
+type ApiResponse<T> = { data: T; code: number; message: string };
 
 export const authApi = {
-  login: async (_data: LoginRequest): Promise<AuthResponse> => {
-    await delay();
-    // TODO: thay bằng api.post('/auth/login', _data).then(r => r.data)
-    // _data.emailOrUsername chấp nhận cả email lẫn username, backend tự phân biệt
-    return { accessToken: 'mock-token-xxx', user: MOCK_USER };
+  /**
+   * Đăng nhập — emailOrUsername chấp nhận cả email lẫn username,
+   * backend tự phân biệt.
+   */
+  login: async (data: LoginRequest): Promise<AuthResponse> => {
+    const res = await axiosClient.post<ApiResponse<AuthResponse>>(API_ENDPOINTS.LOGIN, data);
+    return res.data.data;
   },
 
-  register: async (_data: RegisterRequest): Promise<AuthResponse> => {
-    await delay();
-    // TODO: thay bằng api.post('/auth/register', _data).then(r => r.data)
-    return { accessToken: 'mock-token-xxx', user: { ...MOCK_USER, ..._data, id: MOCK_USER.id } };
+  register: async (data: RegisterRequest): Promise<AuthResponse> => {
+    const res = await axiosClient.post<ApiResponse<AuthResponse>>(API_ENDPOINTS.REGISTER, data);
+    return res.data.data;
   },
 
-  logout: async () => {
-    await delay(200);
-    // TODO: thay bằng api.post('/auth/logout')
+  logout: async (data: LogoutRequest): Promise<void> => {
+    await axiosClient.post(API_ENDPOINTS.LOGOUT, data);
+  },
+  forgotPassword: async (data: ForgotPasswordRequest): Promise<{ sent: boolean }> => {
+    const res = await axiosClient.post<ApiResponse<{ sent: boolean }>>(
+      API_ENDPOINTS.FORGOT_PASSWORD,
+      data,
+    );
+    return res.data.data;
   },
 
-  forgotPassword: async (_data: ForgotPasswordRequest): Promise<{ sent: boolean }> => {
-    await delay();
-    // TODO: thay bằng api.post('/auth/forgot-password', _data).then(r => r.data)
-    return { sent: true };
+  resetPassword: async (data: ResetPasswordRequest): Promise<{ success: boolean }> => {
+    const res = await axiosClient.post<ApiResponse<{ success: boolean }>>(
+      API_ENDPOINTS.RESET_PASSWORD,
+      data,
+    );
+    return res.data.data;
   },
 
-  resetPassword: async (_data: ResetPasswordRequest): Promise<{ success: boolean }> => {
-    await delay();
-    // TODO: thay bằng api.post('/auth/reset-password', _data).then(r => r.data)
-    return { success: true };
-  },
-
-  verifyEmail: async (_data: VerifyEmailRequest): Promise<{ verified: boolean }> => {
-    await delay();
-    // TODO: thay bằng api.post('/auth/verify-email', _data).then(r => r.data)
-    return { verified: _data.code.length === 6 };
+  verifyEmail: async (data: VerifyEmailRequest): Promise<{ verified: boolean }> => {
+    const res = await axiosClient.post<ApiResponse<{ verified: boolean }>>(
+      API_ENDPOINTS.VERIFY_EMAIL,
+      data,
+    );
+    return res.data.data;
   },
 
   resendVerification: async (): Promise<{ sent: boolean }> => {
-    await delay(400);
-    // TODO: thay bằng api.post('/auth/resend-verification')
-    return { sent: true };
+    const res = await axiosClient.post<ApiResponse<{ sent: boolean }>>(API_ENDPOINTS.RESEND_OTP);
+    return res.data.data;
   },
 };

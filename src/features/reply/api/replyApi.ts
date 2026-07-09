@@ -23,7 +23,7 @@ export const replyApi = {
       user: {
         id: MOCK_USER.id,
         username: MOCK_USER.username,
-        displayName: MOCK_USER.displayName,
+        fullName: MOCK_USER.fullName,
         avatarUrl: MOCK_USER.avatarUrl,
       },
       likeCount: 0,

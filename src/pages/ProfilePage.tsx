@@ -212,7 +212,7 @@ export const ProfilePage = () => {
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-0.5">
             <h1 className="text-[22px] font-bold text-text leading-tight">
-              {profile.displayName}
+              {profile.fullName}
             </h1>
             <p className="text-[15px] text-text">
               {profile.username}
@@ -223,7 +223,7 @@ export const ProfilePage = () => {
           </div>
           <Avatar
             src={profile.avatarUrl}
-            name={profile.displayName}
+            name={profile.fullName}
             size="xl"
           />
         </div>
@@ -342,7 +342,7 @@ export const ProfilePage = () => {
           className="flex items-center gap-3 px-4 py-3 border-b border-border cursor-pointer"
           onClick={() => setComposeOpen(true)}
         >
-          <Avatar src={me?.avatarUrl} name={me?.displayName ?? ""} size="sm" />
+          <Avatar src={me?.avatarUrl} name={me?.fullName ?? ""} size="sm" />
           <span className="flex-1 text-sm text-secondary select-none">
             {t('profile_whats_new')}
           </span>

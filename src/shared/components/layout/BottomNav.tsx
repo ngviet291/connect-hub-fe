@@ -57,7 +57,7 @@ export const BottomNav = ({ onCompose }: { onCompose: () => void }) => {
           user.avatarUrl ? (
             <Avatar
               src={user.avatarUrl}
-              name={user.displayName}
+              name={user.fullName}
               size="xs"
               ring={isActive}
             />
