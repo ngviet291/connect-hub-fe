@@ -1,5 +1,5 @@
 import axiosClient from "../../../config/axiosClient";
-import { API_ENDPOINTS } from "../../../config/endpoints";
+import { USER_ENDPOINTS } from "../user_endpoints";
 import type { ApiResponse, PaginationResponse } from "../../../shared/types/api.types";
 import { getErrorMessage } from "../../../constants/errorMessage";
 import type { UserProfile } from "../types/user.types";
@@ -10,7 +10,7 @@ export const userService = {
   getProfile: async (): Promise<UserProfile> => {
     try {
       const res = await axiosClient.get<ApiResponse<UserProfile>>(
-        API_ENDPOINTS.PROFILE,
+        USER_ENDPOINTS.PROFILE,
       );
       const data = res.data;
       if (data.code !== 7000) {
@@ -29,7 +29,7 @@ export const userService = {
   }): Promise<UserProfile> => {
     try {
       const res = await axiosClient.put<ApiResponse<UserProfile>>(
-        API_ENDPOINTS.PROFILE,
+        USER_ENDPOINTS.PROFILE,
         request,
       );
       const data = res.data;
@@ -52,7 +52,7 @@ export const userService = {
   ): Promise<PaginationResponse<UserProfile>> => {
     try {
       const res = await axiosClient.get<ApiResponse<PaginationResponse<UserProfile>>>(
-        API_ENDPOINTS.ADMIN_USERS,
+        USER_ENDPOINTS.ADMIN_USERS,
         {
           params: { page, size },
         },
@@ -74,7 +74,7 @@ export const userService = {
     try {
       if (isLock) {
         const res = await axiosClient.put<ApiResponse<null>>(
-          API_ENDPOINTS.ADMIN_USERS_LOCK(id),
+          USER_ENDPOINTS.ADMIN_USERS_LOCK(id),
         );
         const data = res.data;
         if (data.code !== 7003) {
@@ -82,7 +82,7 @@ export const userService = {
         }
       } else {
         const res = await axiosClient.put<ApiResponse<null>>(
-          API_ENDPOINTS.ADMIN_USERS_UNLOCK(id),
+          USER_ENDPOINTS.ADMIN_USERS_UNLOCK(id),
         );
         const data = res.data;
         if (data.code !== 7004) {
