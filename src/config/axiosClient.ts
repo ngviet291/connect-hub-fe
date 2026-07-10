@@ -7,7 +7,7 @@ import axios, {
 import { store } from "../app/store";
 import { logout, setTokens } from "../features/auth/store/authSlice";
 import { authService } from "../features/auth/service/authService";
-import { API_ENDPOINTS } from "./endpoints";
+import { AUTH_ENDPOINTS } from "../features/auth/auth_endpoints";
 import { ENV } from "./env";
 
 const API_BASE_URL = ENV.API_URL;
@@ -29,7 +29,6 @@ axiosClient.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-// Queue management
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: (token: string) => void;
@@ -49,7 +48,6 @@ const logoutAndRedirect = () => {
   window.location.href = "/login";
 };
 
-// Response Interceptor
 axiosClient.interceptors.response.use(
   (response: AxiosResponse) => response,
 
@@ -64,7 +62,7 @@ axiosClient.interceptors.response.use(
       return Promise.reject(error.response?.data || error);
     }
 
-    if (originalRequest.url?.includes(API_ENDPOINTS.REFRESH_TOKEN)) {
+    if (originalRequest.url?.includes(AUTH_ENDPOINTS.REFRESH_TOKEN)) {
       logoutAndRedirect();
       return Promise.reject(error.response?.data || error);
     }
@@ -75,7 +73,6 @@ axiosClient.interceptors.response.use(
     }
 
     if (isRefreshing) {
-      // ✅ Queued requests tự gắn token và retry bên trong promise
       return new Promise<AxiosResponse>((resolve, reject) => {
         failedQueue.push({
           resolve: (token: string) => {
@@ -103,7 +100,7 @@ axiosClient.interceptors.response.use(
       const tokenResponse = await authService.refreshToken({ refreshToken });
 
       store.dispatch(setTokens(tokenResponse));
-      processQueue(null, tokenResponse.accessToken);isRefreshing = false; // ✅ sau processQueue
+      processQueue(null, tokenResponse.accessToken);isRefreshing = false; 
 
       if (originalRequest.headers) {
         originalRequest.headers.Authorization = `Bearer ${tokenResponse.accessToken}`;
@@ -112,7 +109,7 @@ axiosClient.interceptors.response.use(
       return axiosClient(originalRequest);
     } catch (refreshError) {
       processQueue(refreshError as Error, null);
-      isRefreshing = false; // ✅ sau processQueue
+      isRefreshing = false; 
       logoutAndRedirect();
       return Promise.reject(refreshError);
     }

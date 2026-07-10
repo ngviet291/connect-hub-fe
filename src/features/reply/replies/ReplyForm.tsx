@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Avatar } from "../../../shared/components/ui/Avatar";
 import { Button } from "../../../shared/components/ui/Button";
-import { useAuth } from "../../auth/store/AuthContext";
+import { useAuth } from "../../auth/hooks/useAuth";
 import { useTranslation } from "react-i18next";
 import { REPLY_MAX_LENGTH } from "../../../constants/limits";
 

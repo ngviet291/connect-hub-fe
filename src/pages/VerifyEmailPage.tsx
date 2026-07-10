@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../features/auth/api/authApi';
-import { useAuth } from '../features/auth/store/AuthContext';
+import { useAuth } from '../features/auth/hooks/useAuth';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../shared/components/ui/Button';
 import { LogoIcon, MailIcon } from '../shared/components/icons/Icons';

@@ -1,5 +1,8 @@
 import axiosClient from '../../../config/axiosClient';
-import { API_ENDPOINTS } from '../../../config/endpoints';
+import publicClient from '../../../config/publicClient';
+import { AUTH_ENDPOINTS } from '../auth_endpoints';
+import { getErrorMessage } from '../../../constants/errorMessage';
+import i18n from '../../../i18n/i18n';
 import type {
   AuthResponse,
   ForgotPasswordRequest,
@@ -10,53 +13,99 @@ import type {
   VerifyEmailRequest,
 } from '../types/auth.types';
 
-/** Shape wrapper backend trả về: ApiResponse<T> = { code, data, message } */
 type ApiResponse<T> = { data: T; code: number; message: string };
 
+const AUTH_CODE = {
+  REGISTER_SUCCESS: 1000,
+  LOGIN_SUCCESS: 1001,
+  LOGOUT_SUCCESS: 1002,
+  TOKEN_REFRESH_SUCCESS: 1003,
+  PASSWORD_CHANGE_SUCCESS: 1004,
+  INTROSPECT_SUCCESS: 1005,
+} as const;
+
 export const authApi = {
-  /**
-   * Đăng nhập — emailOrUsername chấp nhận cả email lẫn username,
-   * backend tự phân biệt.
-   */
+  
   login: async (data: LoginRequest): Promise<AuthResponse> => {
-    const res = await axiosClient.post<ApiResponse<AuthResponse>>(API_ENDPOINTS.LOGIN, data);
-    return res.data.data;
+    try {
+      const res = await publicClient.post<ApiResponse<AuthResponse>>(AUTH_ENDPOINTS.LOGIN, data);
+      const resData = res.data;
+      if (resData.code !== AUTH_CODE.LOGIN_SUCCESS) {
+        throw new Error(resData.message || i18n.t('error_login_failed'));
+      }
+      return resData.data;
+    } catch (error) {
+      throw new Error(getErrorMessage(error, i18n.t('error_login_failed')));
+    }
   },
 
   register: async (data: RegisterRequest): Promise<AuthResponse> => {
-    const res = await axiosClient.post<ApiResponse<AuthResponse>>(API_ENDPOINTS.REGISTER, data);
-    return res.data.data;
+    try {
+      const res = await publicClient.post<ApiResponse<AuthResponse>>(AUTH_ENDPOINTS.REGISTER, data);
+      const resData = res.data;
+      if (resData.code !== AUTH_CODE.REGISTER_SUCCESS) {
+        throw new Error(resData.message || i18n.t('error_register_failed'));
+      }
+      return resData.data;
+    } catch (error) {
+      throw new Error(getErrorMessage(error, i18n.t('error_register_failed')));
+    }
   },
 
   logout: async (data: LogoutRequest): Promise<void> => {
-    await axiosClient.post(API_ENDPOINTS.LOGOUT, data);
+    try {
+      const res = await axiosClient.post<ApiResponse<null>>(AUTH_ENDPOINTS.LOGOUT, data);
+      const resData = res.data;
+      if (resData.code !== AUTH_CODE.LOGOUT_SUCCESS) {
+        throw new Error(resData.message || i18n.t('error_logout_failed'));
+      }
+    } catch (error) {
+      throw new Error(getErrorMessage(error, i18n.t('error_logout_failed')));
+    }
   },
+
+  
   forgotPassword: async (data: ForgotPasswordRequest): Promise<{ sent: boolean }> => {
-    const res = await axiosClient.post<ApiResponse<{ sent: boolean }>>(
-      API_ENDPOINTS.FORGOT_PASSWORD,
-      data,
-    );
-    return res.data.data;
+    try {
+      const res = await publicClient.post<ApiResponse<{ sent: boolean }>>(
+        AUTH_ENDPOINTS.FORGOT_PASSWORD,
+        data,
+      );
+      return res.data.data;
+    } catch (error) {
+      throw new Error(getErrorMessage(error, i18n.t('error_forgot_password_failed')));
+    }
   },
 
   resetPassword: async (data: ResetPasswordRequest): Promise<{ success: boolean }> => {
-    const res = await axiosClient.post<ApiResponse<{ success: boolean }>>(
-      API_ENDPOINTS.RESET_PASSWORD,
-      data,
-    );
-    return res.data.data;
+    try {
+      const res = await publicClient.post<ApiResponse<{ success: boolean }>>(
+        AUTH_ENDPOINTS.RESET_PASSWORD,
+        data,
+      );
+      return res.data.data;
+    } catch (error) {
+      throw new Error(getErrorMessage(error, i18n.t('error_reset_password_failed')));
+    }
   },
 
   verifyEmail: async (data: VerifyEmailRequest): Promise<{ verified: boolean }> => {
-    const res = await axiosClient.post<ApiResponse<{ verified: boolean }>>(
-      API_ENDPOINTS.VERIFY_EMAIL,
-      data,
-    );
-    return res.data.data;
+    try {
+      const res = await publicClient.post<ApiResponse<{ verified: boolean }>>(
+        AUTH_ENDPOINTS.VERIFY_EMAIL,
+        data,
+      );
+      return res.data.data;
+    } catch (error) {
+      throw new Error(getErrorMessage(error, i18n.t('verify_error')));
+    }
   },
-
   resendVerification: async (): Promise<{ sent: boolean }> => {
-    const res = await axiosClient.post<ApiResponse<{ sent: boolean }>>(API_ENDPOINTS.RESEND_OTP);
-    return res.data.data;
+    try {
+      const res = await publicClient.post<ApiResponse<{ sent: boolean }>>(AUTH_ENDPOINTS.RESEND_OTP);
+      return res.data.data;
+    } catch (error) {
+      throw new Error(getErrorMessage(error, i18n.t('error_resend_failed')));
+    }
   },
 };

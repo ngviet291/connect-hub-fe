@@ -9,7 +9,7 @@ import {
   VideoIcon,
   XIcon,
 } from "../../../shared/components/icons/Icons";
-import { useAuth } from "../../auth/store/AuthContext";
+import { useAuth } from "../../auth/hooks/useAuth";
 import { POST_MAX_LENGTH } from "../../../constants/limits";
 import { mediaService } from "../../media/mediaService";
 import type { Post, PostMedia } from "../types/post.types";

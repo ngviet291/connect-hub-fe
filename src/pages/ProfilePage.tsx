@@ -24,7 +24,7 @@ import {
   FollowSuggestIcon,
 } from "../shared/components/icons/Icons";
 import { MOCK_CONVERSATIONS } from "../mocks/mockData";
-import { useAuth } from "../features/auth/store/AuthContext";
+import { useAuth } from "../features/auth/hooks/useAuth";
 import { useUserPosts } from "../features/post/hooks/useUserPosts";
 import { PostCard } from "../features/post/components/PostCard";
 import { EditProfileModal } from "../features/user/components/EditProfileModal";

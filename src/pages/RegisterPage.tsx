@@ -1,13 +1,12 @@
 import { useState, type FormEvent, type ChangeEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../features/auth/store/AuthContext';
 import { useTranslation } from 'react-i18next';
+import { authService } from '../features/auth/service/authService';
 import { Button } from '../shared/components/ui/Button';
 import { Input } from '../shared/components/ui/Input';
 import { LogoIcon } from '../shared/components/icons/Icons';
 
 export const RegisterPage = () => {
-  const { register } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [form, setForm] = useState({ username: '', email: '', password: '', confirmPassword: '' });
@@ -31,7 +30,7 @@ export const RegisterPage = () => {
     setLoading(true);
     try {
       const { username, email, password } = form;
-      await register({ username, email, password });
+      await authService.register({ username, email, password });
       navigate('/verify-email');
     } catch {
       setError(t('register_failed_retry'));

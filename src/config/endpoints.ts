@@ -1,11 +1,13 @@
 import { ENV } from "./env";
 
 export const API_ENDPOINTS = {
-  //  AUTH 
+  //  AUTH  — path thật có tiền tố /auth (đã xác nhận qua Postman: {{baseUrl}}/api/v1/auth/login)
   LOGIN: `${ENV.API_URL}/auth/login`,
   REGISTER: `${ENV.API_URL}/auth/register`,
-  REFRESH_TOKEN: `${ENV.API_URL}/auth/refresh`,
+  REFRESH_TOKEN: `${ENV.API_URL}/auth/refresh-token`,
   LOGOUT: `${ENV.API_URL}/auth/logout`,
+  INTROSPECT: `${ENV.API_URL}/auth/introspect`,
+  CHANGE_PASSWORD: `${ENV.API_URL}/auth/change-password`,
   VERIFY_EMAIL: `${ENV.API_URL}/auth/verify-email`,
   RESEND_OTP: `${ENV.API_URL}/auth/resend-otp`,
   FORGOT_PASSWORD: `${ENV.API_URL}/auth/forgot-password`,

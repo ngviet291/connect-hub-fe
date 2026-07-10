@@ -11,7 +11,7 @@ import {
   MoreHorizontalIcon,
 } from "../../../shared/components/icons/Icons";
 import { useTimeAgo } from "../../../shared/utils/date";
-import { useAuth } from "../../auth/store/AuthContext";
+import { useAuth } from "../../auth/hooks/useAuth";
 import { useTranslation } from "react-i18next";
 import type { Post } from "../types/post.types";
 import { MediaGrid } from "./MediaGrid";

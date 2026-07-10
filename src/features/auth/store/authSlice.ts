@@ -1,96 +1,78 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { RootState } from "../../../app/store";
-import type { UserRole } from "../../user/types/user.types.ts";
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type { RootState } from '../../../app/store';
+import type { AuthUser} from '../types/auth.types';
+import type { UserRole } from '../../user/types/user.types';
 
 interface AuthState {
-  accessToken: string | null;
-  refreshToken: string | null;
-  role: UserRole | null;
-  email: string | null;
+  accessToken:   string | null;
+  refreshToken:  string | null;
+  role:          UserRole | null;
+  email:         string | null;
+  fullName:      string | null;
+  currentUser:   AuthUser | null;
   isAuthenticated: boolean;
-  fullName?: string | null;
 }
 
-const loadFromStorage = (): AuthState => {
-  const accessToken = localStorage.getItem("accessToken");
-  const refreshToken = localStorage.getItem("refreshToken");
-  const role = localStorage.getItem("role") as UserRole | null;
-  const email = localStorage.getItem("email");
-  const fullName = localStorage.getItem("fullName");
+const load = (): AuthState => {
+  const accessToken  = localStorage.getItem('accessToken');
+  const refreshToken = localStorage.getItem('refreshToken');
+  const raw = localStorage.getItem('currentUser');
+  const currentUser: AuthUser | null = raw ? JSON.parse(raw) : null;
 
   return {
     accessToken,
     refreshToken,
-    role,
-    email,
-    fullName,
+    role:     (localStorage.getItem('role') as UserRole | null),
+    email:    localStorage.getItem('email'),
+    fullName: localStorage.getItem('fullName'),
+    currentUser,
     isAuthenticated: !!accessToken,
   };
 };
 
-const initialState: AuthState = loadFromStorage();
+const save = (key: string, value: string) => localStorage.setItem(key, value);
+const drop = (...keys: string[]) => keys.forEach((k) => localStorage.removeItem(k));
 
 export const authSlice = createSlice({
-  name: "auth",
-  initialState,
+  name: 'auth',
+  initialState: load(),
   reducers: {
-    setTokens: (
-      state,
-      action: PayloadAction<{ accessToken: string; refreshToken: string }>,
-    ) => {
-      state.accessToken = action.payload.accessToken;
-      state.refreshToken = action.payload.refreshToken;
+    setTokens(state, { payload }: PayloadAction<{ accessToken: string; refreshToken: string }>) {
+      state.accessToken    = payload.accessToken;
+      state.refreshToken   = payload.refreshToken;
       state.isAuthenticated = true;
-      localStorage.setItem("accessToken", action.payload.accessToken);
-      localStorage.setItem("refreshToken", action.payload.refreshToken);
+      save('accessToken',  payload.accessToken);
+      save('refreshToken', payload.refreshToken);
     },
-    setUser: (
-      state,
-      action: PayloadAction<{
-        email: string;
-        role: UserRole;
-        fullName: string;
-      }>,
-    ) => {
-      state.email = action.payload.email;
-      state.role = action.payload.role;
-      state.fullName = action.payload.fullName;
-      localStorage.setItem("email", action.payload.email);
-      localStorage.setItem("fullName", action.payload.fullName);
-      localStorage.setItem("role", action.payload.role);
-    },
-    logout: (state) => {
-      state.accessToken = null;
-      state.refreshToken = null;
-      state.email = null;
-      state.role = null;
-      state.fullName = null;
-      state.isAuthenticated = false;
 
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("email");
-      localStorage.removeItem("role");
-      localStorage.removeItem("fullName");
+    setUser(state, { payload }: PayloadAction<{ email: string; role: UserRole; fullName: string }>) {
+      state.email    = payload.email;
+      state.role     = payload.role;
+      state.fullName = payload.fullName;
+      save('email',    payload.email);
+      save('role',     payload.role);
+      save('fullName', payload.fullName);
     },
-    hydrate: (state) => {
-      state.accessToken = localStorage.getItem("accessToken");
-      state.refreshToken = localStorage.getItem("refreshToken");
-      state.email = localStorage.getItem("email");
-      state.role = localStorage.getItem("role") as UserRole;
-      state.fullName = localStorage.getItem("fullName");
-      state.isAuthenticated = !!state.accessToken;
+
+    setCurrentUser(state, { payload }: PayloadAction<AuthUser>) {
+      state.currentUser = payload;
+      save('currentUser', JSON.stringify(payload));
+    },
+
+    logout(state) {
+      state.accessToken = state.refreshToken = state.email =
+        state.role = state.fullName = state.currentUser = null;
+      state.isAuthenticated = false;
+      drop('accessToken', 'refreshToken', 'email', 'role', 'fullName', 'currentUser');
     },
   },
 });
 
-export const { setTokens, setUser, logout, hydrate } = authSlice.actions;
+export const { setTokens, setUser, setCurrentUser, logout } = authSlice.actions;
 
-export const selectAuth = (state: RootState) => state.auth;
-
-export const selectCurrentUser = (state: RootState) => {
-  if (!state.auth.isAuthenticated) return null;
-  return state.auth;
-};
+export const selectAuth        = (s: RootState) => s.auth;
+export const selectCurrentUser = (s: RootState) => s.auth.currentUser;
+export const selectIsAuth      = (s: RootState) => s.auth.isAuthenticated;
+export const selectRole        = (s: RootState) => s.auth.role;
 
 export default authSlice.reducer;
