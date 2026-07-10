@@ -1,60 +1,152 @@
-import { MOCK_USERS } from '../../../mocks/mockData';
+import axiosClient from '../../../config/axiosClient';
+import { getErrorMessage } from '../../../constants/errorMessage';
+import i18n from '../../../i18n/i18n';
+import { store } from '../../../app/store';
+import { searchApi } from '../../search/api/SearchApi';
+import { USER_ENDPOINTS } from '../user_endpoints';
+import type { ApiResponse, CursorResponse } from '../../../shared/types/api.types';
 import type { UpdateProfileRequest, UserProfile } from '../types/user.types';
 
-const delay = (ms = 400) => new Promise((r) => setTimeout(r, ms));
-let store: UserProfile[] = [...MOCK_USERS];
+const unwrap = <T,>(payload: ApiResponse<T> | T): T => {
+  if (payload && typeof payload === 'object' && 'data' in payload) {
+    return (payload as ApiResponse<T>).data;
+  }
+  return payload as T;
+};
+
+const unwrapUsers = (payload: ApiResponse<CursorResponse<UserProfile>> | CursorResponse<UserProfile>): UserProfile[] => {
+  const data = unwrap(payload);
+  if (Array.isArray(data)) {
+    return data;
+  }
+  return data?.content ?? [];
+};
+
+const getCurrentUser = () => store.getState().auth.currentUser;
 
 export const userApi = {
   getProfile: async (username: string): Promise<UserProfile> => {
-    await delay();
-    // TODO: thay bằng api.get(`/users/${username}`).then(r => r.data)
-    const found = store.find((u) => u.username === username);
-    if (!found) throw new Error('User not found');
-    return { ...found };
+    const normalizedUsername = username.trim();
+    const currentUser = getCurrentUser();
+
+    if (currentUser?.username === normalizedUsername) {
+      try {
+        const res = await axiosClient.get<ApiResponse<UserProfile> | UserProfile>(USER_ENDPOINTS.PROFILE);
+        return unwrap(res.data);
+      } catch (error) {
+        throw new Error(getErrorMessage(error, i18n.t('error_load_profile')));
+      }
+    }
+
+    try {
+      const users = await searchApi.getAllUsers(100);
+      const found = users.find((user) => user.username === normalizedUsername);
+      if (found) {
+        return found;
+      }
+    } catch (error) {
+      throw new Error(getErrorMessage(error, i18n.t('error_load_profile')));
+    }
+
+    throw new Error(i18n.t('error_load_profile'));
   },
 
-  updateProfile: async (username: string, data: UpdateProfileRequest): Promise<UserProfile> => {
-    await delay();
-    // TODO: thay bằng api.patch('/users/me', data).then(r => r.data)
-    store = store.map((u) => (u.username === username ? { ...u, ...data } : u));
-    return store.find((u) => u.username === username)!;
+  updateProfile: async (_username: string, data: UpdateProfileRequest): Promise<UserProfile> => {
+    const currentUser = getCurrentUser();
+    if (!currentUser?.id) {
+      throw new Error(i18n.t('error_update_profile'));
+    }
+
+    try {
+      const res = await axiosClient.put<ApiResponse<UserProfile> | UserProfile>(
+        USER_ENDPOINTS.UPDATE_PROFILE(currentUser.id),
+        data,
+      );
+      return unwrap(res.data);
+    } catch (error) {
+      throw new Error(getErrorMessage(error, i18n.t('error_update_profile')));
+    }
   },
 
   follow: async (userId: string) => {
-    await delay(200);
-    // TODO: thay bằng api.post(`/follow/${userId}`)
-    store = store.map((u) => (u.id === userId ? { ...u, followersCount: u.followersCount + 1 } : u));
+    try {
+      await axiosClient.post(USER_ENDPOINTS.FOLLOW(userId));
+    } catch (error) {
+      throw new Error(getErrorMessage(error, 'Không thể theo dõi người dùng'));
+    }
   },
 
   unfollow: async (userId: string) => {
-    await delay(200);
-    // TODO: thay bằng api.delete(`/follow/${userId}`)
-    store = store.map((u) => (u.id === userId ? { ...u, followersCount: Math.max(0, u.followersCount - 1) } : u));
+    try {
+      await axiosClient.delete(USER_ENDPOINTS.UNFOLLOW(userId));
+    } catch (error) {
+      throw new Error(getErrorMessage(error, 'Không thể bỏ theo dõi người dùng'));
+    }
   },
 
-  getFollowers: async (_username: string): Promise<UserProfile[]> => {
-    await delay();
-    // TODO: thay bằng api.get(`/users/${_username}/followers`).then(r => r.data)
-    return store.slice(1, 4);
+  getFollowers: async (username: string): Promise<UserProfile[]> => {
+    const currentUser = getCurrentUser();
+    try {
+      if (currentUser?.username === username) {
+        const res = await axiosClient.get<ApiResponse<CursorResponse<UserProfile>> | CursorResponse<UserProfile>>(
+          USER_ENDPOINTS.FOLLOWERS,
+        );
+        return unwrapUsers(res.data);
+      }
+
+      const users = await searchApi.getAllUsers(100);
+      const target = users.find((user) => user.username === username);
+      if (!target?.id) {
+        return [];
+      }
+
+      const res = await axiosClient.get<ApiResponse<CursorResponse<UserProfile>> | CursorResponse<UserProfile>>(
+        USER_ENDPOINTS.FOLLOWERS_BY_ID(target.id),
+        { params: { size: 100 } },
+      );
+      return unwrapUsers(res.data);
+    } catch (error) {
+      throw new Error(getErrorMessage(error, i18n.t('error_load_users')));
+    }
   },
 
-  getFollowing: async (_username: string): Promise<UserProfile[]> => {
-    await delay();
-    // TODO: thay bằng api.get(`/users/${_username}/following`).then(r => r.data)
-    return store.filter((u) => u.isFollowing);
+  getFollowing: async (username: string): Promise<UserProfile[]> => {
+    const currentUser = getCurrentUser();
+    try {
+      if (currentUser?.username === username) {
+        const res = await axiosClient.get<ApiResponse<CursorResponse<UserProfile>> | CursorResponse<UserProfile>>(
+          USER_ENDPOINTS.FOLLOWING,
+        );
+        return unwrapUsers(res.data);
+      }
+
+      const users = await searchApi.getAllUsers(100);
+      const target = users.find((user) => user.username === username);
+      if (!target?.id) {
+        return [];
+      }
+
+      const res = await axiosClient.get<ApiResponse<CursorResponse<UserProfile>> | CursorResponse<UserProfile>>(
+        USER_ENDPOINTS.FOLLOWING_BY_ID(target.id),
+        { params: { size: 100 } },
+      );
+      return unwrapUsers(res.data);
+    } catch (error) {
+      throw new Error(getErrorMessage(error, i18n.t('error_load_users')));
+    }
   },
 
   searchUsers: async (query: string): Promise<UserProfile[]> => {
-    await delay(300);
-    // TODO: thay bằng api.get('/users/search', { params: { q: query } }).then(r => r.data)
-    const q = query.trim().toLowerCase();
-    if (!q) return [];
-    return store.filter((u) => u.username.toLowerCase().includes(q) || u.fullName.toLowerCase().includes(q));
+    const response = await searchApi.searchUsers(query);
+    return response.content;
   },
 
   getSuggested: async (): Promise<UserProfile[]> => {
-    await delay();
-    // TODO: thay bằng api.get('/users/suggested').then(r => r.data)
-    return store.filter((u) => !u.isFollowing).slice(0, 3);
+    try {
+      const users = await searchApi.getAllUsers(20);
+      return users.filter((u) => !u.isFollowing).slice(0, 3);
+    } catch (error) {
+      throw new Error(getErrorMessage(error, 'Không thể tải gợi ý người dùng'));
+    }
   },
 };

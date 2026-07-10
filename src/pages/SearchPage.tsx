@@ -7,6 +7,7 @@ import { UserRowSkeleton } from '../shared/components/ui/Skeleton';
 import { EmptyState } from '../shared/components/ui/EmptyState';
 import { TrendingWidget } from '../shared/components/layout/TrendingWidget';
 import { useDebounce } from '../shared/hooks/useDebounce';
+import { searchApi } from '../features/search/api/SearchApi';
 import { userApi } from '../features/user/api/userApi';
 import type { UserProfile } from '../features/user/types/user.types';
 import { useTranslation } from 'react-i18next';
@@ -25,9 +26,9 @@ export const SearchPage = () => {
       return;
     }
     setIsLoading(true);
-    userApi
-      .searchUsers(debounced)
-      .then(setResults)
+    searchApi
+      .searchUsers(debounced, null, 20)
+      .then((response) => setResults(response.content))
       .finally(() => setIsLoading(false));
   }, [debounced]);
 
