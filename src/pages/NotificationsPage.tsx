@@ -37,8 +37,7 @@ export const NotificationsPage = () => {
         {unreadCount > 0 && (
           <button
             onClick={markAllAsRead}
-            className="cursor-pointer text-sm font-medium text-primary hover:underline"
-          >
+            className="cursor-pointer text-sm font-medium text-primary hover:underline">
             {t("mark_all_read")}
           </button>
         )}
@@ -53,11 +52,12 @@ export const NotificationsPage = () => {
         onChange={setTab}
       />
       {isLoading &&
+        notifications.length === 0 &&
         Array.from({ length: 5 }).map((_, i) => (
           <NotificationItemSkeleton key={i} />
         ))}
       {error && <ErrorState onRetry={refetch} />}
-      {!isLoading && filtered.length === 0 && (
+      {!(isLoading && notifications.length === 0) && filtered.length === 0 && !error && (
         <EmptyState
           icon={<BellIcon size={32} />}
           title={t("empty_notifications")}

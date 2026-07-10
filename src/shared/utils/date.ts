@@ -1,11 +1,11 @@
-import { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import type { Locale } from '../../i18n/translations';
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import type { Locale } from "../../i18n/translations";
 
 // Map locale nội bộ ('vi' | 'en') sang locale chuẩn Intl để format ngày tháng
 const INTL_LOCALE: Record<Locale, string> = {
-  vi: 'vi-VN',
-  en: 'en-US',
+  vi: "vi-VN",
+  en: "en-US",
 };
 
 /**
@@ -19,35 +19,38 @@ export const useTimeAgo = () => {
 
   return useMemo(
     () =>
-      (dateStr: string): string => {
-        const diff = Date.now() - new Date(dateStr).getTime();
+      (dateInput: string | Date): string => {
+        const date =
+          dateInput instanceof Date ? dateInput : new Date(dateInput);
+
+        const diff = Date.now() - date.getTime();
         const sec = Math.floor(diff / 1000);
-        if (sec < 60) return t('time_just_now');
+
+        if (sec < 60) return t("time_just_now");
 
         const min = Math.floor(sec / 60);
-        if (min < 60) return t('time_minutes', { count: min });
+        if (min < 60) return t("time_minutes", { count: min });
 
         const hr = Math.floor(min / 60);
-        if (hr < 24) return t('time_hours', { count: hr });
+        if (hr < 24) return t("time_hours", { count: hr });
 
         const day = Math.floor(hr / 24);
-        if (day < 7) return t('time_days', { count: day });
+        if (day < 7) return t("time_days", { count: day });
 
         const week = Math.floor(day / 7);
-        if (week < 4) return t('time_weeks', { count: week });
+        if (week < 4) return t("time_weeks", { count: week });
 
-        const date = new Date(dateStr);
         const isThisYear = date.getFullYear() === new Date().getFullYear();
+
         return date.toLocaleDateString(intlLocale, {
-          day: '2-digit',
-          month: '2-digit',
-          year: isThisYear ? undefined : 'numeric',
+          day: "2-digit",
+          month: "2-digit",
+          year: isThisYear ? undefined : "numeric",
         });
       },
     [intlLocale, t],
   );
 };
-
 /**
  * Hook trả về hàm format ngày đầy đủ (vd dùng cho tooltip khi hover timestamp), đổi theo locale hiện tại.
  */
@@ -60,11 +63,11 @@ export const useFormatFullDate = () => {
     () =>
       (dateStr: string): string =>
         new Date(dateStr).toLocaleString(intlLocale, {
-          hour: '2-digit',
-          minute: '2-digit',
-          day: '2-digit',
-          month: 'long',
-          year: 'numeric',
+          hour: "2-digit",
+          minute: "2-digit",
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
         }),
     [intlLocale],
   );

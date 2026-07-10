@@ -1,5 +1,5 @@
-import type { UUID } from '../../../shared/types/common.types';
-import type { PostAuthor } from '../../post/types/post.types';
+import type { UUID } from "../../../shared/types/common.types";
+import type { PostAuthor } from "../../post/types/post.types";
 
 export interface Conversation {
   id: UUID;
@@ -12,7 +12,7 @@ export interface Conversation {
 export interface MessageAttachment {
   id: UUID;
   url: string;
-  type: 'IMAGE' | 'VIDEO';
+  type: "IMAGE" | "VIDEO";
 }
 
 export interface MessageReaction {
@@ -30,4 +30,12 @@ export interface ChatMessage {
   replyToId?: UUID;
   reactions?: MessageReaction[];
   createdAt: string;
+}
+
+/** Event nhận qua /user/queue/pending khi có tin nhắn PRIVATE đầu tiên (chưa mutual-follow) */
+export interface PendingMessageEvent {
+  senderId: UUID;
+  senderUsername: string;
+  firstMessagePreview: string;
+  messageResponse?: ChatMessage;
 }

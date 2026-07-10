@@ -11,19 +11,23 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.12.0",
+    "@stomp/stompjs": "^7.3.0",
     "axios": "^1.7.9",
     "i18next": "^24.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-i18next": "^15.0.0",
+    "react-icons": "^5.7.0",
     "react-redux": "^9.3.0",
     "react-router-dom": "^6.28.1",
-    "redux": "^5.0.1"
+    "redux": "^5.0.1",
+    "sockjs-client": "^1.6.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.0",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
+    "@types/sockjs-client": "^1.5.4",
     "@vitejs/plugin-react": "^4.3.4",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.2",

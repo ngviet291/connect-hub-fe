@@ -1,10 +1,10 @@
 import axiosClient from "../../../config/axiosClient";
 import { API_ENDPOINTS } from "../../../config/endpoints";
-import type { ApiResponse, PaginationResponse } from "../../../types/api.type";
 import { getErrorMessage } from "../../../constants/errorMessage";
 import type { UserProfile } from "../types/user.types";
 import type { UUID } from "../../../shared/types/common.types";
 import i18n from "../../../i18n/i18n";
+import type { ApiResponse, PaginationResponse } from "@/shared/types/api.types";
 
 export const userService = {
   getProfile: async (): Promise<UserProfile> => {

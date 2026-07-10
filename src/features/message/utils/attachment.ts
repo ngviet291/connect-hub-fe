@@ -14,3 +14,5 @@ export const createAttachment = (file: File): MessageAttachment => {
 export const revokeAttachment = (url: string) => {
   if (url.startsWith('blob:')) URL.revokeObjectURL(url);
 };
+
+
