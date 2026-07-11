@@ -8,7 +8,7 @@ export const USER_ENDPOINTS = {
   FOLLOWING_BY_ID: (id: string) =>
     `${ENV.API_URL}/v1/admin/users/${id}/following`,
   UPDATE_PROFILE: (id: string) => `${ENV.API_URL}/v1/users/${id}`,
-  USER_BY_USERNAME: (username: string) => `${ENV.API_URL}/v1/users/${username}`,
+  USER_BY_USERNAME: (username: string) => `${ENV.API_URL}/v1/users/username/${username}`,
   SEARCH: `${ENV.API_URL}/v1/users/search`,
   AVATAR_UPLOAD: `${ENV.API_URL}/v1/users/avatar/upload`,
   AVATAR_DELETE: `${ENV.API_URL}/v1/users/avatar/delete`,
