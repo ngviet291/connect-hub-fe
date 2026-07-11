@@ -1,5 +1,5 @@
-import type { UUID } from '../../../shared/types/common.types';
-export type UserRole = "ROLE_USER" | "ROLE_ADMIN"|"ROLE_MODERATOR";
+import type { UUID } from "../../../shared/types/common.types";
+export type UserRole = "ROLE_USER" | "ROLE_ADMIN" | "ROLE_MODERATOR";
 export interface UserProfile {
   id: UUID;
   username: string;
@@ -25,4 +25,13 @@ export interface UpdateProfileRequest {
   website?: string;
   location?: string;
   avatarUrl?: string;
+}
+
+export interface UserListEntry {
+  id: string;
+  username: string;
+  fullName: string;
+  avatarUrl?: string;
+  bio?: string;
+  isFollowing?: boolean;
 }

@@ -1,19 +1,19 @@
-import { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { authApi } from '../features/auth/api/authApi';
-import { useAuth } from '../features/auth/hooks/useAuth';
-import { useTranslation } from 'react-i18next';
-import { Button } from '../shared/components/ui/Button';
-import { LogoIcon, MailIcon } from '../shared/components/icons/Icons';
+import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../features/auth/hooks/useAuth";
+import { useTranslation } from "react-i18next";
+import { Button } from "../shared/components/ui/Button";
+import { LogoIcon, MailIcon } from "../shared/components/icons/Icons";
+import { authService } from "@/features/auth/service/authService";
 
 export const VerifyEmailPage = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [digits, setDigits] = useState<string[]>(Array(6).fill(''));
+  const [digits, setDigits] = useState<string[]>(Array(6).fill(""));
   const [loading, setLoading] = useState(false);
   const [resent, setResent] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleChange = (idx: number, value: string) => {
@@ -25,19 +25,19 @@ export const VerifyEmailPage = () => {
   };
 
   const handleVerify = async () => {
-    setError('');
+    setError("");
     setLoading(true);
     try {
-      const res = await authApi.verifyEmail({ code: digits.join('') });
-      if (res.verified) navigate('/');
-      else setError(t('verify_error'));
+      const res = await authService.verifyEmail({ code: digits.join("") });
+      if (res.verified) navigate("/");
+      else setError(t("verify_error"));
     } finally {
       setLoading(false);
     }
   };
 
   const handleResend = async () => {
-    await authApi.resendVerification();
+    await authService.resendVerification();
     setResent(true);
     setTimeout(() => setResent(false), 3000);
   };
@@ -50,9 +50,12 @@ export const VerifyEmailPage = () => {
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
             <MailIcon size={28} />
           </div>
-          <h1 className="text-2xl font-bold text-text">{t('verify_title')}</h1>
+          <h1 className="text-2xl font-bold text-text">{t("verify_title")}</h1>
           <p className="text-sm text-secondary">
-            {t('verify_subtitle_prefix')} <span className="font-medium text-text">{user?.email ?? t('your_email')}</span>
+            {t("verify_subtitle_prefix")}{" "}
+            <span className="font-medium text-text">
+              {user?.email ?? t("your_email")}
+            </span>
           </p>
         </div>
 
@@ -60,7 +63,9 @@ export const VerifyEmailPage = () => {
           {digits.map((d, i) => (
             <input
               key={i}
-              ref={(el) => { inputsRef.current[i] = el; }}
+              ref={(el) => {
+                inputsRef.current[i] = el;
+              }}
               value={d}
               onChange={(e) => handleChange(i, e.target.value)}
               maxLength={1}
@@ -71,12 +76,19 @@ export const VerifyEmailPage = () => {
         </div>
         {error && <p className="mb-3 text-sm text-danger">{error}</p>}
 
-        <Button fullWidth size="lg" loading={loading} disabled={digits.some((d) => !d)} onClick={handleVerify}>
-          {t('verify_submit')}
+        <Button
+          fullWidth
+          size="lg"
+          loading={loading}
+          disabled={digits.some((d) => !d)}
+          onClick={handleVerify}>
+          {t("verify_submit")}
         </Button>
 
-        <button onClick={handleResend} className="mt-4 cursor-pointer text-sm font-medium text-primary hover:underline">
-          {resent ? t('resend_sent') : t('resend_code')}
+        <button
+          onClick={handleResend}
+          className="mt-4 cursor-pointer text-sm font-medium text-primary hover:underline">
+          {resent ? t("resend_sent") : t("resend_code")}
         </button>
       </div>
     </div>

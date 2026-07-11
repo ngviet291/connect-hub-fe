@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { Avatar } from "../../../shared/components/ui/Avatar";
 import { Button } from "../../../shared/components/ui/Button";
-import type { UserListEntry } from "../types/user.types";
 import { useTranslation } from "react-i18next";
+import type { UserListEntry } from "../types/user.types";
 
 interface UserListItemProps {
   user: UserListEntry;

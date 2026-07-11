@@ -1,10 +1,10 @@
 import axiosClient from "../../../config/axiosClient";
 import { USER_ENDPOINTS } from "../util/UserEndpoints";
 import { getErrorMessage } from "../../../constants/errorMessage";
-import type { UserProfile } from "../types/user.types";
-import type { UUID } from "../../../shared/types/common.types";
 import i18n from "../../../i18n/i18n";
 import type { ApiResponse, PaginationResponse } from "@/shared/types/api.types";
+import type { UUID } from "../../../shared/types/common.types";
+import type { UpdateProfileRequest, UserProfile } from "../types/user.types";
 
 export const userService = {
   getProfile: async (): Promise<UserProfile> => {
@@ -21,10 +21,13 @@ export const userService = {
       throw new Error(getErrorMessage(error, i18n.t("error_load_profile")));
     }
   },
-  updateProfile: async (request: {
-    fullName: string;
-    phone: string;
-  }): Promise<UserProfile> => {
+
+  // _username giữ lại để tương thích chữ ký cũ (EditProfileModal truyền vào),
+  // BE xác định user hiện tại qua token nên không cần dùng tới.
+  updateProfile: async (
+    _username: string,
+    request: UpdateProfileRequest,
+  ): Promise<UserProfile> => {
     try {
       const res = await axiosClient.put<ApiResponse<UserProfile>>(
         USER_ENDPOINTS.PROFILE,
@@ -54,7 +57,6 @@ export const userService = {
       if (data.code !== 7002) {
         throw new Error(data.message || i18n.t("error_load_users"));
       }
-
       return data.data;
     } catch (error) {
       throw new Error(getErrorMessage(error, i18n.t("error_load_users")));
@@ -89,6 +91,7 @@ export const userService = {
       );
     }
   },
+
   getUserByUsername: async (username: string): Promise<UserProfile> => {
     try {
       const res = await axiosClient.get<ApiResponse<UserProfile>>(

@@ -1,10 +1,10 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { authApi } from '../features/auth/api/authApi';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../shared/components/ui/Button';
 import { Input } from '../shared/components/ui/Input';
 import { LogoIcon, ArrowLeftIcon } from '../shared/components/icons/Icons';
+import { authService } from '@/features/auth/service/authService';
 
 export const ForgotPasswordPage = () => {
   const { t } = useTranslation();
@@ -16,7 +16,7 @@ export const ForgotPasswordPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await authApi.forgotPassword({ email });
+      await authService.forgotPassword({ email });
       setSent(true);
     } finally {
       setLoading(false);

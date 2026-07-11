@@ -1,29 +1,37 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Avatar } from '../../../shared/components/ui/Avatar';
-import { Button } from '../../../shared/components/ui/Button';
-import { Skeleton } from '../../../shared/components/ui/Skeleton';
-import { userApi } from '../api/userApi';
-import { useTranslation } from 'react-i18next';
-import type { UserProfile } from '../types/user.types';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Avatar } from "../../../shared/components/ui/Avatar";
+import { Button } from "../../../shared/components/ui/Button";
+import { Skeleton } from "../../../shared/components/ui/Skeleton";
+import { useTranslation } from "react-i18next";
+import type { UserListEntry, UserProfile } from "../types/user.types";
+import { followService } from "@/features/follow";
+import { MOCK_USER, MOCK_USERS } from "@/mocks/mockData";
 
 export const SuggestedUsers = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [users, setUsers] = useState<UserProfile[] | null>(null);
+  const [users, setUsers] = useState<UserListEntry[] | null>(null);
 
   useEffect(() => {
-    userApi.getSuggested().then(setUsers);
+    setUsers(MOCK_USERS);
   }, []);
 
-  const toggleFollow = async (u: UserProfile) => {
-    setUsers((prev) => prev?.map((x) => (x.id === u.id ? { ...x, isFollowing: !x.isFollowing } : x)) ?? null);
-    u.isFollowing ? await userApi.unfollow(u.id) : await userApi.follow(u.id);
+  const toggleFollow = async (u: UserListEntry) => {
+    setUsers(
+      (prev) =>
+        prev?.map((x) =>
+          x.id === u.id ? { ...x, isFollowing: !x.isFollowing } : x,
+        ) ?? null,
+    );
+    u.isFollowing
+      ? await followService.unfollow(u.id)
+      : await followService.follow(u.id);
   };
 
   return (
     <div className="rounded-2xl border border-border bg-surface p-4">
-      <h3 className="mb-1 font-semibold text-text">{t('suggested_users')}</h3>
+      <h3 className="mb-1 font-semibold text-text">{t("suggested_users")}</h3>
       <div className="flex flex-col divide-y divide-border">
         {!users &&
           Array.from({ length: 3 }).map((_, i) => (
@@ -37,13 +45,22 @@ export const SuggestedUsers = () => {
           ))}
         {users?.map((u) => (
           <div key={u.id} className="flex items-center gap-3 py-3">
-            <Avatar src={u.avatarUrl} name={u.fullName} size="sm" onClick={() => navigate(`/profile/${u.username}`)} />
-            <div className="min-w-0 flex-1 cursor-pointer" onClick={() => navigate(`/profile/${u.username}`)}>
-              <p className="truncate text-sm font-semibold text-text">{u.fullName}</p>
+            <Avatar
+              src={u.avatarUrl}
+              name={u.fullName}
+              size="sm"
+              onClick={() => navigate(`/profile/${u.username}`)}
+            />
+            <div
+              className="min-w-0 flex-1 cursor-pointer"
+              onClick={() => navigate(`/profile/${u.username}`)}>
+              <p className="truncate text-sm font-semibold text-text">
+                {u.fullName}
+              </p>
               <p className="truncate text-xs text-secondary">@{u.username}</p>
             </div>
             <Button size="sm" variant="outline" onClick={() => toggleFollow(u)}>
-              {u.isFollowing ? t('unfollow') : t('follow')}
+              {u.isFollowing ? t("unfollow") : t("follow")}
             </Button>
           </div>
         ))}
