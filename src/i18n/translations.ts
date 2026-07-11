@@ -234,6 +234,10 @@ export const translations = {
     // Lỗi service (auth)
     error_login_failed: 'Đăng nhập thất bại',
     error_register_failed: 'Đăng ký thất bại',
+    error_logout_failed: 'Đăng xuất thất bại',
+    error_forgot_password_failed: 'Gửi yêu cầu quên mật khẩu thất bại',
+    error_reset_password_failed: 'Đặt lại mật khẩu thất bại',
+    error_resend_failed: 'Gửi lại mã thất bại',
 
     // Preview media trong danh sách hội thoại
     media_preview_image: 'Hình ảnh',
@@ -468,6 +472,10 @@ export const translations = {
     // Service errors (auth)
     error_login_failed: 'Login failed',
     error_register_failed: 'Registration failed',
+    error_logout_failed: 'Logout failed',
+    error_forgot_password_failed: 'Failed to send password reset request',
+    error_reset_password_failed: 'Failed to reset password',
+    error_resend_failed: 'Failed to resend code',
 
     // Media preview in conversation list
     media_preview_image: 'Image',

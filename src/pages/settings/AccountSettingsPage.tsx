@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '../../features/auth/store/AuthContext';
+import { useAuth } from '../../features/auth/hooks/useAuth';
 import { useTranslation } from 'react-i18next';
 import { Input } from '../../shared/components/ui/Input';
 import { Button } from '../../shared/components/ui/Button';

@@ -29,7 +29,7 @@ export const followService = {
 
   unfollow: async (targetUserId: string): Promise<FollowResponse> => {
     try {
-      const res = await axiosClient.post<ApiResponse<FollowResponse>>(
+      const res = await axiosClient.delete<ApiResponse<FollowResponse>>(
         FOLLOW_ENDPOINTS.UNFOLLOW(targetUserId),
       );
       const data = res.data;
@@ -45,17 +45,18 @@ export const followService = {
   },
 
   getFollowers: async (
+    username: string,
     cursor?: string,
     size = 20,
   ): Promise<CursorResponse<UserSummaryResponse>> => {
     try {
       const res = await axiosClient.get<
         ApiResponse<CursorResponse<UserSummaryResponse>>
-      >(FOLLOW_ENDPOINTS.FOLLOWERS, {
+      >(FOLLOW_ENDPOINTS.FOLLOWERS(username), {
         params: { size, ...(cursor ? { cursor } : {}) },
       });
       const data = res.data;
-      if (!data || data.code !== 3001 || !data.data) {
+      if (!data || data.code !== 200 || !data.data) {
         throw new Error(
           getErrorMessage(data.message, "Failed to fetch followers"),
         );
@@ -67,17 +68,18 @@ export const followService = {
   },
 
   getFollowing: async (
+    username: string,
     cursor?: string,
     size = 20,
   ): Promise<CursorResponse<UserSummaryResponse>> => {
     try {
       const res = await axiosClient.get<
         ApiResponse<CursorResponse<UserSummaryResponse>>
-      >(FOLLOW_ENDPOINTS.FOLLOWING, {
+      >(FOLLOW_ENDPOINTS.FOLLOWING(username), {
         params: { size, ...(cursor ? { cursor } : {}) },
       });
       const data = res.data;
-      if (!data || data.code !== 3002 || !data.data) {
+      if (!data || data.code !== 200 || !data.data) {
         throw new Error(
           getErrorMessage(data.message, "Failed to fetch following"),
         );
@@ -88,10 +90,10 @@ export const followService = {
     }
   },
 
-  getStats: async (): Promise<UserStats> => {
+  getStats: async (userId: string): Promise<UserStats> => {
     try {
       const res = await axiosClient.get<ApiResponse<UserStats>>(
-        FOLLOW_ENDPOINTS.USER_STATS,
+        FOLLOW_ENDPOINTS.USER_STATS(userId),
       );
       const data = res.data;
       if (!data || data.code !== 3007 || !data.data) {

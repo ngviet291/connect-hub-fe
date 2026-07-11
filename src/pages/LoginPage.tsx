@@ -1,13 +1,12 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../features/auth/store/AuthContext";
+import { authService } from "../features/auth/service/authService";
 import { useTranslation } from "react-i18next";
 import { Button } from "../shared/components/ui/Button";
 import { Input } from "../shared/components/ui/Input";
 import { LogoIcon } from "../shared/components/icons/Icons";
 
 export const LoginPage = () => {
-  const { login } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
@@ -20,10 +19,10 @@ export const LoginPage = () => {
     setError("");
     setLoading(true);
     try {
-      await login({ username, password });
+      await authService.login({ username, password });
       navigate("/");
-    } catch {
-      setError(t("login_invalid_credentials"));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("login_invalid_credentials"));
     } finally {
       setLoading(false);
     }

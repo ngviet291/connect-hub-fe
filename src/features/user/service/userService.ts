@@ -1,5 +1,5 @@
 import axiosClient from "../../../config/axiosClient";
-import { API_ENDPOINTS } from "../../../config/endpoints";
+import { USER_ENDPOINTS } from "../util/UserEndpoints";
 import { getErrorMessage } from "../../../constants/errorMessage";
 import type { UserProfile } from "../types/user.types";
 import type { UUID } from "../../../shared/types/common.types";
@@ -10,7 +10,7 @@ export const userService = {
   getProfile: async (): Promise<UserProfile> => {
     try {
       const res = await axiosClient.get<ApiResponse<UserProfile>>(
-        API_ENDPOINTS.PROFILE,
+        USER_ENDPOINTS.PROFILE,
       );
       const data = res.data;
       if (data.code !== 7000) {
@@ -18,9 +18,7 @@ export const userService = {
       }
       return data.data;
     } catch (error) {
-      throw new Error(
-        getErrorMessage(error, i18n.t("error_load_profile")),
-      );
+      throw new Error(getErrorMessage(error, i18n.t("error_load_profile")));
     }
   },
   updateProfile: async (request: {
@@ -29,20 +27,16 @@ export const userService = {
   }): Promise<UserProfile> => {
     try {
       const res = await axiosClient.put<ApiResponse<UserProfile>>(
-        API_ENDPOINTS.PROFILE,
+        USER_ENDPOINTS.PROFILE,
         request,
       );
       const data = res.data;
       if (data.code !== 7001) {
-        throw new Error(
-          data.message || i18n.t("error_update_profile"),
-        );
+        throw new Error(data.message || i18n.t("error_update_profile"));
       }
       return data.data;
     } catch (error) {
-      throw new Error(
-        getErrorMessage(error, i18n.t("error_update_profile")),
-      );
+      throw new Error(getErrorMessage(error, i18n.t("error_update_profile")));
     }
   },
 
@@ -51,12 +45,11 @@ export const userService = {
     size: number,
   ): Promise<PaginationResponse<UserProfile>> => {
     try {
-      const res = await axiosClient.get<ApiResponse<PaginationResponse<UserProfile>>>(
-        API_ENDPOINTS.ADMIN_USERS,
-        {
-          params: { page, size },
-        },
-      );
+      const res = await axiosClient.get<
+        ApiResponse<PaginationResponse<UserProfile>>
+      >(USER_ENDPOINTS.ADMIN_USERS, {
+        params: { page, size },
+      });
       const data = res.data;
       if (data.code !== 7002) {
         throw new Error(data.message || i18n.t("error_load_users"));
@@ -64,9 +57,7 @@ export const userService = {
 
       return data.data;
     } catch (error) {
-      throw new Error(
-        getErrorMessage(error, i18n.t("error_load_users")),
-      );
+      throw new Error(getErrorMessage(error, i18n.t("error_load_users")));
     }
   },
 
@@ -74,7 +65,7 @@ export const userService = {
     try {
       if (isLock) {
         const res = await axiosClient.put<ApiResponse<null>>(
-          API_ENDPOINTS.ADMIN_USERS_LOCK(id),
+          USER_ENDPOINTS.ADMIN_USERS_LOCK(id),
         );
         const data = res.data;
         if (data.code !== 7003) {
@@ -82,7 +73,7 @@ export const userService = {
         }
       } else {
         const res = await axiosClient.put<ApiResponse<null>>(
-          API_ENDPOINTS.ADMIN_USERS_UNLOCK(id),
+          USER_ENDPOINTS.ADMIN_USERS_UNLOCK(id),
         );
         const data = res.data;
         if (data.code !== 7004) {
@@ -91,8 +82,25 @@ export const userService = {
       }
     } catch (error) {
       throw new Error(
-        getErrorMessage(error, isLock ? i18n.t("error_lock_user") : i18n.t("error_unlock_user")),
+        getErrorMessage(
+          error,
+          isLock ? i18n.t("error_lock_user") : i18n.t("error_unlock_user"),
+        ),
       );
+    }
+  },
+  getUserByUsername: async (username: string): Promise<UserProfile> => {
+    try {
+      const res = await axiosClient.get<ApiResponse<UserProfile>>(
+        USER_ENDPOINTS.USER_BY_USERNAME(username),
+      );
+      const data = res.data;
+      if (data.code !== 3000) {
+        throw new Error(data.message || i18n.t("error_load_user"));
+      }
+      return data.data;
+    } catch (error) {
+      throw new Error(getErrorMessage(error, i18n.t("error_load_user")));
     }
   },
 };

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { messageApi } from '../api/messageApi';
 import type { ChatMessage, MessageAttachment } from '../types/message.types';
-import { useAuth } from '../../auth/store/AuthContext';
+import { useAuth } from '../../auth/hooks/useAuth';
 import { useConversations } from './useConversations';
 
 export const useChat = (conversationId: string | undefined) => {

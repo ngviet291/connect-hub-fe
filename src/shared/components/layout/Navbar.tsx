@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { LogoIcon } from '../icons/Icons';
 import { NotificationDropdown } from '../../../features/notification/components/NotificationDropdown';
-import { useAuth } from '../../../features/auth/store/AuthContext';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import { useTranslation } from 'react-i18next';
 
 export const Navbar = () => {

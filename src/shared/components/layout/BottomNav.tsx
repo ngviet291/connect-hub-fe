@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { useAuth } from '../../../features/auth/store/AuthContext';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import {
   HomeIcon,
   SearchIcon,

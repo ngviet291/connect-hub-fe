@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '../../auth/store/AuthContext';
+import { useAuth } from '../../auth/hooks/useAuth';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '../../../shared/components/ui/Avatar';
 import type { Post } from '../types/post.types';

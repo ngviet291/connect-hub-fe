@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../auth/store/AuthContext";
+import { useAuth } from "../../auth/hooks/useAuth";
 import { useTranslation } from "react-i18next";
 import type { ChatMessage } from "../types/message.types";
 import type { PostAuthor } from "../../post/types/post.types";

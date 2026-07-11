@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
-import { userApi } from "../features/user/api/userApi";
 import type { UserProfile } from "../features/user/types/user.types";
 import { Avatar } from "../shared/components/ui/Avatar";
 import { Button } from "../shared/components/ui/Button";
@@ -23,18 +22,22 @@ import {
   CreateConnectIcon,
   FollowSuggestIcon,
 } from "../shared/components/icons/Icons";
-import { MOCK_CONVERSATIONS } from "../mocks/mockData";
-import { useAuth } from "../features/auth/store/AuthContext";
+import { MOCK_CONVERSATIONS, MOCK_USERS } from "../mocks/mockData";
+import { useAuth } from "../features/auth/hooks/useAuth";
 import { useUserPosts } from "../features/post/hooks/useUserPosts";
 import { PostCard } from "../features/post/components/PostCard";
 import { EditProfileModal } from "../features/user/components/EditProfileModal";
 import { CreatePostModal } from "../features/post/components/CreatePostModal";
+import { userService } from "@/features/user/service/userService";
+import { useToast } from "@/shared/components/ui/Toast";
+import { followService } from "@/features/follow";
 
 /* ─── tabs & completion cards: định nghĩa bên trong component để dùng được t() ─── */
 
 /* ═══════════════════════════════════════════════════════════ */
 export const ProfilePage = () => {
   const { username } = useParams<{ username: string }>();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const { user: me } = useAuth();
   const { t } = useTranslation();
@@ -101,18 +104,27 @@ export const ProfilePage = () => {
     removePost,
   } = useUserPosts(username);
 
-  const fetchProfile = () => {
+  const fetchProfile = async () => {
     if (!username) return;
     setIsLoading(true);
     setLoadError(false);
-    userApi
-      .getProfile(username)
-      .then(setProfile)
-      .catch(() => setLoadError(true))
-      .finally(() => setIsLoading(false));
+    try {
+      setProfile(null);
+      const user = await userService.getUserByUsername(username);
+      setProfile(user);
+
+      const stats = await followService.getStats(user.id);
+      setProfile((prev) => (prev ? { ...prev, ...stats } : null));
+    } catch (error) {
+      setLoadError(true);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  useEffect(fetchProfile, [username]);
+  useEffect(() => {
+    fetchProfile();
+  }, [username]);
   useEffect(() => setActiveTab("posts"), [username]);
 
   if (isLoading) return <ProfileHeaderSkeleton />;
@@ -134,18 +146,26 @@ export const ProfilePage = () => {
   };
 
   const toggleFollow = async () => {
-    profile.isFollowing
-      ? await userApi.unfollow(profile.id)
-      : await userApi.follow(profile.id);
-    setProfile((p) =>
-      p
-        ? {
-            ...p,
-            isFollowing: !p.isFollowing,
-            followersCount: p.followersCount + (p.isFollowing ? -1 : 1),
-          }
-        : p,
-    );
+    const wasFollowing = profile.isFollowing;
+    try {
+      wasFollowing
+        ? await followService.unfollow(profile.id)
+        : await followService.follow(profile.id);
+      setProfile((p) =>
+        p
+          ? {
+              ...p,
+              isFollowing: !wasFollowing,
+              followersCount: p.followersCount + (wasFollowing ? -1 : 1),
+            }
+          : p,
+      );
+    } catch (error) {
+      showToast(
+        wasFollowing ? t("error_unfollow_user") : t("error_follow_user"),
+        "error",
+      );
+    }
   };
 
   /* completion cards left = 4 (mock) */
@@ -187,8 +207,7 @@ export const ProfilePage = () => {
         </div>
         <button
           onClick={() => navigate(-1)}
-          className="hidden cursor-pointer rounded-full p-1.5 text-text hover:bg-surface-hover md:flex"
-        >
+          className="hidden cursor-pointer rounded-full p-1.5 text-text hover:bg-surface-hover md:flex">
           <ArrowLeftIcon size={22} />
         </button>
 
@@ -200,8 +219,7 @@ export const ProfilePage = () => {
         {/* Right: search */}
         <button
           onClick={() => navigate("/search")}
-          className="cursor-pointer rounded-full p-1.5 text-text hover:bg-surface-hover"
-        >
+          className="cursor-pointer rounded-full p-1.5 text-text hover:bg-surface-hover">
           <SearchIcon size={22} />
         </button>
       </div>
@@ -221,11 +239,7 @@ export const ProfilePage = () => {
               )}
             </p>
           </div>
-          <Avatar
-            src={profile.avatarUrl}
-            name={profile.fullName}
-            size="xl"
-          />
+          <Avatar src={profile.avatarUrl} name={profile.fullName} size="xl" />
         </div>
 
         {/* Bio */}
@@ -237,20 +251,34 @@ export const ProfilePage = () => {
 
         {/* Followers row */}
         <div className="mt-3 flex items-center justify-between">
+          <div className="flex gap-4">
+            <button
+              onClick={() =>
+                navigate(`/profile/${username}/followers/${profile.id}`)
+              }
+              className="cursor-pointer text-[14px] text-secondary hover:underline">
+              <span className="font-semibold text-text">
+                {profile.followersCount ?? 0}
+              </span>{" "}
+              {t("followers_label")}
+            </button>
+            <button
+              onClick={() =>
+                navigate(`/profile/${username}/following/${profile.id}`)
+              }
+              className="cursor-pointer text-[14px] text-secondary hover:underline">
+              <span className="font-semibold text-text">
+                {profile.followingCount ?? 0}
+              </span>{" "}
+              {t("following")}
+            </button>
+          </div>
           <button
-            onClick={() => navigate(`/profile/${username}/followers`)}
-            className="cursor-pointer text-[14px] text-secondary hover:underline"
-          >
-            <span className="font-semibold text-text">
-              {profile.followersCount.toLocaleString()}
-            </span>{" "}
-            {t("followers_label")}
-          </button>
-          <button
-            onClick={() => navigate(`/profile/${username}/followers`)}
+            onClick={() =>
+              navigate(`/profile/${username}/following/${profile.id}`)
+            }
             className="cursor-pointer rounded-lg p-1.5 text-secondary hover:bg-surface-hover hover:text-text"
-            title={t('profile_stats_tooltip')}
-          >
+            title={t("profile_stats_tooltip")}>
             <BarChartIcon size={20} />
           </button>
         </div>
@@ -261,8 +289,7 @@ export const ProfilePage = () => {
             <Button
               variant="outline"
               className="w-full rounded-xl font-semibold"
-              onClick={() => setEditOpen(true)}
-            >
+              onClick={() => setEditOpen(true)}>
               {t("edit_profile_button")}
             </Button>
           ) : (
@@ -270,15 +297,13 @@ export const ProfilePage = () => {
               <Button
                 variant={profile.isFollowing ? "outline" : "primary"}
                 className="flex-1 rounded-xl font-semibold"
-                onClick={toggleFollow}
-              >
+                onClick={toggleFollow}>
                 {profile.isFollowing ? t("following") : t("follow")}
               </Button>
               <Button
                 variant="outline"
                 className="flex-1 rounded-xl font-semibold"
-                onClick={handleMessage}
-              >
+                onClick={handleMessage}>
                 {t("message_button")}
               </Button>
               <Dropdown
@@ -309,8 +334,7 @@ export const ProfilePage = () => {
           ref={tabsRef}
           onScroll={checkTabsOverflow}
           className="flex overflow-x-auto scrollbar-hide"
-          style={{ scrollbarWidth: "none" }}
-        >
+          style={{ scrollbarWidth: "none" }}>
           {PROFILE_TABS.map((tab) => (
             <button
               key={tab.key}
@@ -319,8 +343,7 @@ export const ProfilePage = () => {
                 activeTab === tab.key
                   ? "text-text"
                   : "text-secondary hover:text-text"
-              }`}
-            >
+              }`}>
               {tab.label}
               {activeTab === tab.key && (
                 <span className="absolute inset-x-0 bottom-0 h-[2px] bg-text" />
@@ -340,20 +363,18 @@ export const ProfilePage = () => {
       {isMe && activeTab === "posts" && (
         <div
           className="flex items-center gap-3 px-4 py-3 border-b border-border cursor-pointer"
-          onClick={() => setComposeOpen(true)}
-        >
+          onClick={() => setComposeOpen(true)}>
           <Avatar src={me?.avatarUrl} name={me?.fullName ?? ""} size="sm" />
           <span className="flex-1 text-sm text-secondary select-none">
-            {t('profile_whats_new')}
+            {t("profile_whats_new")}
           </span>
           <button
             className="cursor-pointer rounded-xl bg-text px-4 py-1.5 text-sm font-semibold text-background hover:opacity-90 transition-opacity"
             onClick={(e) => {
               e.stopPropagation();
               setComposeOpen(true);
-            }}
-          >
-            {t('post_button')}
+            }}>
+            {t("post_button")}
           </button>
         </div>
       )}
@@ -366,21 +387,19 @@ export const ProfilePage = () => {
             <div className="px-4 py-4">
               <div className="mb-3 flex items-center justify-between">
                 <span className="text-[13px] font-semibold text-text">
-                  {t('profile_completion_title')}
+                  {t("profile_completion_title")}
                 </span>
                 <span className="text-[13px] font-semibold text-text">
-                  {t('profile_completion_remaining', { count: completionLeft })}
+                  {t("profile_completion_remaining", { count: completionLeft })}
                 </span>
               </div>
               <div
                 className="flex gap-3 overflow-x-auto pb-1"
-                style={{ scrollbarWidth: "none" }}
-              >
+                style={{ scrollbarWidth: "none" }}>
                 {COMPLETION_CARDS.map((card) => (
                   <div
                     key={card.key}
-                    className="shrink-0 w-44 rounded-2xl border border-border bg-surface p-4 flex flex-col gap-3"
-                  >
+                    className="shrink-0 w-44 rounded-2xl border border-border bg-surface p-4 flex flex-col gap-3">
                     <span className="text-secondary">{card.icon}</span>
                     <div>
                       <p className="text-[13px] font-semibold text-text leading-snug">
@@ -396,8 +415,7 @@ export const ProfilePage = () => {
                           ? setComposeOpen(true)
                           : navigate("/search")
                       }
-                      className="w-full cursor-pointer rounded-xl bg-text py-2 text-[13px] font-bold text-background hover:opacity-90 transition-opacity"
-                    >
+                      className="w-full cursor-pointer rounded-xl bg-text py-2 text-[13px] font-bold text-background hover:opacity-90 transition-opacity">
                       {card.cta}
                     </button>
                   </div>
@@ -458,15 +476,15 @@ export const ProfilePage = () => {
           <p className="text-[11px] text-secondary leading-relaxed">
             © {new Date().getFullYear()}{" "}
             <span className="text-primary cursor-pointer hover:underline">
-              {t('footer_terms')}
+              {t("footer_terms")}
             </span>
             {"  "}
             <span className="text-secondary cursor-pointer hover:underline">
-              {t('footer_privacy')}
+              {t("footer_privacy")}
             </span>
             <br />
             <span className="text-secondary cursor-pointer hover:underline">
-              {t('footer_cookies')}
+              {t("footer_cookies")}
             </span>
           </p>
         </footer>

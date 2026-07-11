@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../../features/auth/store/AuthContext';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import type { UserRole } from '../../../features/user/types/user.types';
-import { PageSpinner } from '../ui/Spinner';
 
 interface RoleGuardProps {
   children: ReactNode;
@@ -16,12 +15,11 @@ interface RoleGuardProps {
  * Nếu đã đăng nhập nhưng không đủ quyền -> điều hướng /403.
  */
 export const RoleGuard = ({ children, allowedRoles }: RoleGuardProps) => {
-  const { user, isLoading } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
-  if (isLoading) return <PageSpinner />;
-  if (!user) return <Navigate to="/login" replace />;
+  if (!isAuthenticated || !user) return <Navigate to="/login" replace />;
 
-  const isAllowed = user.roles?.some((role) => allowedRoles.includes(role));
+  const isAllowed = user.roles?.some((role: UserRole) => allowedRoles.includes(role));
   if (!isAllowed) return <Navigate to="/403" replace />;
 
   return <>{children}</>;

@@ -40,7 +40,7 @@ export const NotificationItem = ({
       className={`flex w-full cursor-pointer items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-surface/60 ${
         !notification.read ? "bg-primary/[0.05]" : ""
       }`}>
-      <NotificationIcon type={notification.type} />
+      <NotificationIcon type={notification.type}  />
 
       <Avatar
         src={notification.user.avatarUrl}

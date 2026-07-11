@@ -2,7 +2,6 @@ import type { AuthUser } from '../features/auth/types/auth.types';
 import type { Post } from '../features/post/types/post.types';
 import type { UserProfile } from '../features/user/types/user.types';
 import type { ReplyItem } from '../features/reply/types/reply.types';
-import type { AppNotification } from '../features/notification/types/notification.types';
 import type { Conversation, ChatMessage } from '../features/message/types/message.types';
 
 export const MOCK_USER: AuthUser = {
@@ -200,43 +199,7 @@ export const MOCK_TRENDS = [
   { tag: 'tailwindcss', postCount: 6720 },
 ];
 
-export const MOCK_NOTIFICATIONS: AppNotification[] = [
-  {
-    id: 'n1',
-    type: 'LIKE',
-    message: 'đã thích bài viết của bạn',
-    isRead: false,
-    createdAt: new Date(Date.now() - 4 * 60 * 1000).toISOString(),
-    actor: { id: 'user-002', username: 'jane_doe', fullName: 'Jane Doe' },
-    targetPostId: 'post-001',
-  },
-  {
-    id: 'n2',
-    type: 'REPLY',
-    message: 'đã bình luận về bài viết của bạn',
-    isRead: false,
-    createdAt: new Date(Date.now() - 20 * 60 * 1000).toISOString(),
-    actor: { id: 'user-003', username: 'john_smith', fullName: 'John Smith' },
-    targetPostId: 'post-001',
-  },
-  {
-    id: 'n3',
-    type: 'FOLLOW',
-    message: 'đã bắt đầu theo dõi bạn',
-    isRead: true,
-    createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-    actor: { id: 'user-004', username: 'linh.tran', fullName: 'Linh Trần' },
-  },
-  {
-    id: 'n4',
-    type: 'REPOST',
-    message: 'đã chia sẻ lại bài viết của bạn',
-    isRead: true,
-    createdAt: new Date(Date.now() - 26 * 60 * 60 * 1000).toISOString(),
-    actor: { id: 'user-005', username: 'minh.nguyen', fullName: 'Minh Nguyễn' },
-    targetPostId: 'post-004',
-  },
-];
+
 
 export const MOCK_CONVERSATIONS: Conversation[] = [
   {

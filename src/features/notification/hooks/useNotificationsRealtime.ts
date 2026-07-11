@@ -2,9 +2,9 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../../app/store";
 import { stompClient } from "../../../config/stompClient";
-import { useAuth } from "../../auth/store/AuthContext";
 import { notificationApi } from "../api/notificationApi";
 import type { NotificationResponse } from "../types/notification.types";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 // Nhiều component (NotificationDropdown, NotificationsPage) cùng gọi hook này song song.
 // Chỉ mở 1 subscription WS thực sự — đếm số "người dùng" đang active, chỉ unsubscribe

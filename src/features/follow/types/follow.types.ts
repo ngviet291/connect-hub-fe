@@ -15,7 +15,6 @@ export interface UserStats {
   postsCount?: number;
 }
 
-
 export interface FollowResponse {
   followerId: UUID;
   followingId: UUID;
@@ -27,4 +26,5 @@ export interface UserSummaryResponse {
   username: string;
   fullName: string;
   avatarUrl?: string;
+  isFollowing?: boolean; // mình có đang follow người này không
 }
