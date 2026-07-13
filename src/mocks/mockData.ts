@@ -2,7 +2,6 @@ import type { AuthUser } from '../features/auth/types/auth.types';
 import type { Post } from '../features/post/types/post.types';
 import type { UserProfile } from '../features/user/types/user.types';
 import type { ReplyItem } from '../features/reply/types/reply.types';
-import type { Conversation, ChatMessage } from '../features/message/types/message.types';
 
 export const MOCK_USER: AuthUser = {
   id: 'user-001',
@@ -199,43 +198,3 @@ export const MOCK_TRENDS = [
   { tag: 'tailwindcss', postCount: 6720 },
 ];
 
-
-
-export const MOCK_CONVERSATIONS: Conversation[] = [
-  {
-    id: 'conv-1',
-    participant: { id: 'user-002', username: 'jane_doe', fullName: 'Jane Doe' },
-    lastMessage: 'Chốt design mới lúc chiều nhé!',
-    lastMessageAt: new Date(Date.now() - 6 * 60 * 1000).toISOString(),
-    unreadCount: 2,
-  },
-  {
-    id: 'conv-2',
-    participant: { id: 'user-003', username: 'john_smith', fullName: 'John Smith' },
-    lastMessage: 'Ok để mình check lại API',
-    lastMessageAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-    unreadCount: 0,
-  },
-  {
-    id: 'conv-3',
-    participant: { id: 'user-004', username: 'linh.tran', fullName: 'Linh Trần' },
-    lastMessage: 'Cảm ơn bạn nhiều 🙏',
-    lastMessageAt: new Date(Date.now() - 26 * 60 * 60 * 1000).toISOString(),
-    unreadCount: 0,
-  },
-];
-
-export const MOCK_MESSAGES: Record<string, ChatMessage[]> = {
-  'conv-1': [
-    { id: 'm1', conversationId: 'conv-1', senderId: 'user-002', content: 'Chào As, review giúp mình design mới nhé', createdAt: new Date(Date.now() - 40 * 60 * 1000).toISOString() },
-    { id: 'm2', conversationId: 'conv-1', senderId: 'user-001', content: 'Ok để mình xem qua', createdAt: new Date(Date.now() - 35 * 60 * 1000).toISOString() },
-    { id: 'm3', conversationId: 'conv-1', senderId: 'user-002', content: 'Chốt design mới lúc chiều nhé!', createdAt: new Date(Date.now() - 6 * 60 * 1000).toISOString() },
-  ],
-  'conv-2': [
-    { id: 'm4', conversationId: 'conv-2', senderId: 'user-003', content: 'API feed bị lỗi cursor rồi', createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString() },
-    { id: 'm5', conversationId: 'conv-2', senderId: 'user-001', content: 'Ok để mình check lại API', createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString() },
-  ],
-  'conv-3': [
-    { id: 'm6', conversationId: 'conv-3', senderId: 'user-004', content: 'Cảm ơn bạn nhiều 🙏', createdAt: new Date(Date.now() - 26 * 60 * 60 * 1000).toISOString() },
-  ],
-};

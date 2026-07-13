@@ -106,4 +106,18 @@ export const userService = {
       throw new Error(getErrorMessage(error, i18n.t("error_load_user")));
     }
   },
+  getUserById: async (id: string): Promise<UserProfile> => {
+    try {
+      const res = await axiosClient.get<ApiResponse<UserProfile>>(
+        USER_ENDPOINTS.USER_BY_ID(id),
+      );
+      const data = res.data;
+      if (data.code !== 3000) {
+        throw new Error(data.message || i18n.t("error_load_user"));
+      }
+      return data.data;
+    } catch (error) {
+      throw new Error(getErrorMessage(error, i18n.t("error_load_user")));
+    }
+  },
 };

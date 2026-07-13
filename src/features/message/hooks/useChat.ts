@@ -1,56 +1,158 @@
-import { useCallback, useEffect, useState } from 'react';
-import { messageApi } from '../api/messageApi';
-import type { ChatMessage, MessageAttachment } from '../types/message.types';
-import { useAuth } from '../../auth/hooks/useAuth';
-import { useConversations } from './useConversations';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { messageService } from "../service/messageService";
+import {
+  mapMessageResponse,
+  type ChatMessage,
+  type MediaRequest,
+} from "../types/message.types";
+import { useConversations } from "./useConversations";
+import { useMessageSocket } from "./useMessageSocket";
 
-export const useChat = (conversationId: string | undefined) => {
+interface UseChatOptions {
+  /** Hội thoại đã tồn tại — có thì ưu tiên dùng để load lịch sử + gửi tiếp */
+  conversationId?: string;
+  /**
+   * Chỉ cần khi CHƯA có conversationId (mở chat lần đầu với 1 user) — BE
+   * (ChatService.sendMessage) yêu cầu bắt buộc 1 trong 2: conversationId
+   * hoặc recipientId.
+   */
+  recipientId?: string;
+}
+
+export const useChat = ({ conversationId, recipientId }: UseChatOptions) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
+  const [hasNext, setHasNext] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const cursorRef = useRef<string | undefined>(undefined);
+  const isLoadingRef = useRef(false);
   const { markConversationRead } = useConversations();
-  const { user } = useAuth();
 
   const fetchMessages = useCallback(async () => {
     if (!conversationId) return;
+    isLoadingRef.current = true;
     setIsLoading(true);
     try {
-      setMessages(await messageApi.getMessages(conversationId));
-      markConversationRead(conversationId);
+      const res = await messageService.getMessages(conversationId);
+      const mapped = res.content.map(mapMessageResponse);
+      setMessages(mapped);
+      cursorRef.current = res.nextCursor ?? undefined;
+      setHasNext(res.hasNext);
+      setError(null);
+      const last = res.content[0]; // BE trả mới nhất trước theo cursor DESC
+      if (last) markConversationRead(conversationId, last.messageId);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to fetch messages");
     } finally {
+      isLoadingRef.current = false;
       setIsLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conversationId]);
+  }, [conversationId, markConversationRead]);
 
   useEffect(() => {
     fetchMessages();
   }, [fetchMessages]);
+  // ── Realtime: 1 hook DUY NHẤT sở hữu cả state lẫn subscription cho
+  // conversation đang mở (guide.md mục 5 — tránh 2 nguồn cùng ghi vào 1 state).
+  const { subscribeConversation } = useMessageSocket({
+    onMessage: (incoming) => {
+      if (incoming.conversationId !== conversationId) return; // tin của conversation khác — bỏ qua ở đây
+      setMessages((prev) =>
+        prev.some((m) => m.id === incoming.id) ? prev : [...prev, incoming],
+      );
+    },
+    onMessageDeleted: (event) => {
+      if (event.conversationId !== conversationId) return;
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === event.messageId
+            ? { ...m, content: "", media: undefined, recalled: true }
+            : m,
+        ),
+      );
+    },
+  });
 
-  const sendMessage = async (content: string, media?: MessageAttachment[], replyToId?: string) => {
-    if (!conversationId || (!content.trim() && !media?.length)) return;
+  useEffect(() => {
+    if (conversationId) subscribeConversation(conversationId);
+  }, [conversationId, subscribeConversation]);
+  /** Load thêm tin nhắn cũ hơn (cuộn lên) */
+  const loadMore = useCallback(async () => {
+    if (
+      !conversationId ||
+      isLoadingRef.current ||
+      !hasNext ||
+      !cursorRef.current
+    )
+      return;
+    isLoadingRef.current = true;
+    try {
+      const res = await messageService.getMessages(
+        conversationId,
+        cursorRef.current,
+      );
+      setMessages((prev) => [...res.content.map(mapMessageResponse), ...prev]);
+      cursorRef.current = res.nextCursor ?? undefined;
+      setHasNext(res.hasNext);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to fetch messages");
+    } finally {
+      isLoadingRef.current = false;
+    }
+  }, [conversationId, hasNext]);
+
+  const sendMessage = async (
+    content: string,
+    media?: MediaRequest[],
+    replyToMessageId?: string,
+  ) => {
+    if (
+      (!content.trim() && !media?.length) ||
+      (!conversationId && !recipientId)
+    )
+      return;
     setIsSending(true);
     try {
-      const msg = await messageApi.sendMessage(conversationId, content.trim(), media, replyToId);
-      setMessages((prev) => [...prev, msg]);
+      const response = await messageService.sendMessage({
+        conversationId: conversationId ?? null,
+        recipientId: conversationId ? null : (recipientId ?? null),
+        content: content.trim(),
+        replyToMessageId: replyToMessageId ?? null,
+        media,
+      });
+      const mapped = mapMessageResponse(response);
+      setMessages((prev) => [...prev, mapped]);
+      return mapped; // <-- thêm: trả về để caller lấy conversationId khi chat mới
     } finally {
       setIsSending(false);
     }
   };
 
+  /**
+   * BE không có API "thu hồi" riêng — chỉ có xoá mềm (DELETE /v1/messages/{id},
+   * status chuyển DELETED). FE hiển thị y hệt UX "recalled" cũ dựa vào status đó.
+   */
   const recallMessage = async (messageId: string) => {
-    if (!conversationId) return;
     setMessages((prev) =>
-      prev.map((m) => (m.id === messageId ? { ...m, content: '', media: undefined, recalled: true } : m)),
+      prev.map((m) =>
+        m.id === messageId
+          ? { ...m, content: "", media: undefined, recalled: true }
+          : m,
+      ),
     );
-    await messageApi.recallMessage(conversationId, messageId);
+    await messageService.deleteMessage(messageId);
   };
 
-  const reactToMessage = async (messageId: string, emoji: string) => {
-    if (!conversationId || !user) return;
-    const updated = await messageApi.reactToMessage(conversationId, messageId, emoji, user.id);
-    if (updated) setMessages((prev) => prev.map((m) => (m.id === messageId ? updated : m)));
+  return {
+    messages,
+    isLoading,
+    isSending,
+    hasNext,
+    error,
+    sendMessage,
+    recallMessage,
+    loadMore,
+    refetch: fetchMessages,
   };
-
-  return { messages, isLoading, isSending, sendMessage, recallMessage, reactToMessage };
 };

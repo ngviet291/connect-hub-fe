@@ -199,7 +199,7 @@ export const translations = {
     back_home: 'Về trang chủ',
     not_found_desc: 'Trang bạn tìm không tồn tại hoặc đã bị xóa.',
     forbidden_desc: 'Bạn không có quyền truy cập trang này.',
-    messages_empty_hint: 'Chọn một cuộc trò chuyện để bắt đầu',
+    messages_empty_hint: 'Không có tin nhắn nào. Nhấn nút "Nhắn tin" để bắt đầu trò chuyện.',
 
     // Trang cá nhân (ProfilePage)
     profile_tab_posts: 'Connect',

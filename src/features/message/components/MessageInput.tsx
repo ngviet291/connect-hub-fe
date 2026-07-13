@@ -2,8 +2,8 @@ import { useRef, useState } from 'react';
 import { IconButton } from '../../../shared/components/ui/IconButton';
 import { useTranslation } from 'react-i18next';
 import { SendIcon, ImageIcon, XIcon } from '../../../shared/components/icons/Icons';
-import { createAttachment, revokeAttachment } from '../utils/attachment';
-import type { ChatMessage, MessageAttachment } from '../types/message.types';
+import { createAttachment, revokeAttachment, type PendingAttachment } from '../utils/attachment';
+import type { ChatMessage } from '../types/message.types';
 
 const MAX_ATTACHMENTS = 4;
 
@@ -13,14 +13,17 @@ export const MessageInput = ({
   replyingTo,
   onCancelReply,
 }: {
-  onSend: (text: string, media?: MessageAttachment[]) => void;
+  /** media ở đây là PendingAttachment (local blob preview) — nơi gọi onSend
+   *  chịu trách nhiệm upload thật rồi map sang MediaRequest trước khi gọi
+   *  messageService.sendMessage (xem TODO trong utils/attachment.ts). */
+  onSend: (text: string, media?: PendingAttachment[]) => void;
   disabled?: boolean;
   replyingTo?: ChatMessage | null;
   onCancelReply?: () => void;
 }) => {
   const { t } = useTranslation();
   const [value, setValue] = useState('');
-  const [media, setMedia] = useState<MessageAttachment[]>([]);
+  const [media, setMedia] = useState<PendingAttachment[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFiles = (files: FileList | null) => {

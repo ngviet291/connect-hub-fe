@@ -22,7 +22,6 @@ import {
   CreateConnectIcon,
   FollowSuggestIcon,
 } from "../shared/components/icons/Icons";
-import { MOCK_CONVERSATIONS, MOCK_USERS } from "../mocks/mockData";
 import { useAuth } from "../features/auth/hooks/useAuth";
 import { useUserPosts } from "../features/post/hooks/useUserPosts";
 import { PostCard } from "../features/post/components/PostCard";
@@ -31,6 +30,7 @@ import { CreatePostModal } from "../features/post/components/CreatePostModal";
 import { userService } from "@/features/user/service/userService";
 import { useToast } from "@/shared/components/ui/Toast";
 import { followService } from "@/features/follow";
+import { conversationService } from "@/features/message";
 
 /* ─── tabs & completion cards: định nghĩa bên trong component để dùng được t() ─── */
 
@@ -75,6 +75,7 @@ export const ProfilePage = () => {
   const [composeOpen, setComposeOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("posts");
   const tabsRef = useRef<HTMLDivElement>(null);
+  const [loadingNavigateChat, setLoadingNavigateChat] = useState(false);
   const [tabsOverflow, setTabsOverflow] = useState({
     left: false,
     right: false,
@@ -133,11 +134,27 @@ export const ProfilePage = () => {
 
   const isMe = me?.username === username;
 
-  const handleMessage = () => {
-    const conversation = MOCK_CONVERSATIONS.find(
-      (c) => c.participant.username === profile.username,
-    );
-    navigate(conversation ? `/messages/${conversation.id}` : "/messages");
+  const handleMessage = async () => {
+    try {
+      setLoadingNavigateChat(true);
+
+      const existingConvId =
+        await conversationService.checkPrivateConversationExists(profile.id);
+
+      if (!existingConvId) {
+        navigate(`/messages/new?userId=${profile.id}`, {
+          state: { targetUser: profile },
+        });
+      } else {
+        navigate(`/messages/${existingConvId}`);
+      }
+    } catch (error) {
+      error instanceof Error
+        ? showToast(error.message, "error")
+        : showToast(t("error_navigate_chat"), "error");
+    } finally {
+      setLoadingNavigateChat(false);
+    }
   };
 
   const handleCopyProfileLink = () => {
@@ -301,6 +318,7 @@ export const ProfilePage = () => {
                 {profile.isFollowing ? t("following") : t("follow")}
               </Button>
               <Button
+                loading={loadingNavigateChat}
                 variant="outline"
                 className="flex-1 rounded-xl font-semibold"
                 onClick={handleMessage}>

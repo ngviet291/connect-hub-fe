@@ -1,4 +1,5 @@
-import type { UUID } from "../../../shared/types/common.types";
+import type { UUID } from "@/shared/types/common.types";
+
 export type UserRole = "ROLE_USER" | "ROLE_ADMIN" | "ROLE_MODERATOR";
 export interface UserProfile {
   id: UUID;

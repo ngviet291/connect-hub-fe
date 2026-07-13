@@ -96,7 +96,10 @@ const routes: RouteObject[] = [
       {
         path: "/messages",
         element: <MessagesPage />,
-        children: [{ path: ":conversationId", element: <ChatPage /> }],
+        children: [
+          { path: ":conversationId", element: <ChatPage /> },
+          { path: "new", element: <ChatPage /> },
+        ],
       },
 
       {

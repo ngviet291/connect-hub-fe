@@ -32,17 +32,22 @@ export const ConversationList = () => {
     <div className="flex flex-col">
       {conversations.map((c) => (
         <button
-          key={c.id}
-          onClick={() => navigate(`/messages/${c.id}`)}
-          className={`flex cursor-pointer items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-surface/60 ${conversationId === c.id ? 'bg-surface' : ''}`}
+          key={c.conversationId}
+          onClick={() => navigate(`/messages/${c.conversationId}`)}
+          className={`flex cursor-pointer items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-surface/60 ${conversationId === c.conversationId ? 'bg-surface' : ''}`}
         >
-          <Avatar src={c.participant.avatarUrl} name={c.participant.fullName} size="lg" />
+          <Avatar src={c.displayAvatarUrl} name={c.displayName} size="lg" />
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between gap-2">
-              <p className="truncate font-semibold text-text">{c.participant.fullName}</p>
-              <span className="shrink-0 text-xs text-secondary">{timeAgo(c.lastMessageAt)}</span>
+              <p className="truncate font-semibold text-text">{c.displayName}</p>
+              {c.lastMessageAt && (
+                <span className="shrink-0 text-xs text-secondary">{timeAgo(c.lastMessageAt)}</span>
+              )}
             </div>
-            <p className={`truncate text-sm ${c.unreadCount > 0 ? 'font-medium text-text' : 'text-secondary'}`}>{c.lastMessage}</p>
+            <p className={`truncate text-sm ${c.unreadCount > 0 ? 'font-medium text-text' : 'text-secondary'}`}>
+              {c.lastMessageSenderUsername ? `${c.lastMessageSenderUsername}: ` : ''}
+              {c.lastMessageContent ?? ''}
+            </p>
           </div>
           {c.unreadCount > 0 && <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-accent" />}
         </button>

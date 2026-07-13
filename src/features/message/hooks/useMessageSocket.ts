@@ -1,61 +1,107 @@
 import { useCallback, useEffect, useRef } from "react";
 import { stompClient } from "../../../config/stompClient";
-import { useAuth } from "../../auth/store/AuthContext";
-import type { ChatMessage, PendingMessageEvent } from "../types/message.types";
+import type {
+  AddNewMembersEvent,
+  ChatMessage,
+  MessageDeletedNotificationEvent,
+  UpdateMemberRoleEvent,
+} from "../types/message.types";
+import { mapMessageResponse } from "../types/message.types";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 interface UseMessageSocketOptions {
-  /** Gọi khi nhận 1 tin nhắn mới (đã lọc trùng + lọc tin của chính mình) qua bất kỳ kênh nào */
+  /** Tin nhắn mới (đã lọc trùng + lọc tin của chính mình) qua bất kỳ kênh nào */
   onMessage: (message: ChatMessage) => void;
-  /** Gọi khi nhận notification "tin nhắn đầu tiên, đang chờ mutual-follow" (PRIVATE, PENDING) */
-  onPendingMessage?: (event: PendingMessageEvent) => void;
+  /** Tin nhắn bị xoá (soft-delete) trong 1 conversation đang mở */
+  onMessageDeleted?: (event: MessageDeletedNotificationEvent) => void;
+  /**
+   * Member mới được thêm vào group đang mở.
+   * TODO: chưa xác nhận được destination thật cho event này (xem ghi chú
+   * trong JSDoc bên dưới) — callback tạm thời không được gọi tới.
+   */
+  onMembersAdded?: (event: AddNewMembersEvent) => void;
+  /**
+   * Role 1 thành viên trong group đang mở bị đổi.
+   * TODO: chưa xác nhận được destination thật cho event này.
+   */
+  onMemberRoleUpdated?: (event: UpdateMemberRoleEvent) => void;
+  /**
+   * Chính user hiện tại vừa được thêm vào 1 group mới (chưa mở conversation đó).
+   * TODO: chưa xác nhận được destination thật cho event này.
+   */
+  onAddedToConversation?: (event: AddNewMembersEvent) => void;
 }
 
 /**
- * Quản lý toàn bộ phần WebSocket realtime cho chat:
- * - /user/queue/pending      : tin PRIVATE đầu tiên khi 2 bên chưa mutual-follow
- * - /user/queue/messages     : mọi tin nhắn gửi tới user hiện tại (đảm bảo nhận được tin đầu
- *                              của 1 conversation mới dù chưa từng subscribe topic đó)
- * - /topic/conversations/:id/messages : tin nhắn realtime trong 1 conversation đang mở
+ * Quản lý toàn bộ WebSocket realtime cho chat, khớp đúng tài liệu
+ * "WebSocket Destinations" (chat module) đã xác nhận:
  *
- * Logic chống nhận trùng (1 tin có thể tới qua cả user-queue lẫn topic) giữ nguyên
- * theo đúng bản hook test gốc (seenMessageIdsRef).
+ *  - /user/queue/messages                       : MessageNotificationEvent (PRIVATE)
+ *  - /user/queue/notifications                  : NotificationEvent (mọi loại, kể cả group message khi chưa mở conversation)
+ *  - /topic/conversations/{id}/messages         : MessageNotificationEvent (PRIVATE) & GroupMessageEvent (GROUP)
+ *  - /topic/conversations/{id}/messages/deleted : MessageDeletedNotificationEvent
+ *
+ * ĐÃ GỠ (không còn khớp tài liệu, từng bị BE deny "Failed to authorize
+ * message... granted=false" vì không phải rule thiếu mà destination không
+ * tồn tại thật sự):
+ *  - "/topic/conversation/{id}/event" (số ít) — dùng cho AddNewMembersEvent/UpdateMemberRoleEvent
+ *  - "/user/queue/conversations" — dùng cho onAddedToConversation
+ *
+ * TODO: hỏi lại BE destination thật cho 2 event trên (nếu có) rồi bật lại
+ * onMembersAdded/onMemberRoleUpdated/onAddedToConversation tương ứng.
  */
 export function useMessageSocket({
   onMessage,
-  onPendingMessage,
+  onMessageDeleted,
 }: UseMessageSocketOptions) {
   const { user } = useAuth();
   const seenMessageIdsRef = useRef(new Set<string>());
   const subscribedConvsRef = useRef(new Set<string>());
   const onMessageRef = useRef(onMessage);
-  const onPendingRef = useRef(onPendingMessage);
+  const onMessageDeletedRef = useRef(onMessageDeleted);
   onMessageRef.current = onMessage;
-  onPendingRef.current = onPendingMessage;
+  onMessageDeletedRef.current = onMessageDeleted;
 
-  const handleIncoming = useCallback(
+  const handleIncomingMessage = useCallback(
     (raw: any) => {
-      if (raw.senderId && raw.senderId === user?.id) return; // bỏ qua tin của chính mình
-      if (raw.messageId && seenMessageIdsRef.current.has(raw.messageId)) return; // đã nhận qua kênh khác
-      if (raw.messageId) seenMessageIdsRef.current.add(raw.messageId);
-      onMessageRef.current({ ...raw, id: raw.id ?? raw.messageId });
+      // Payload thật là MessageNotificationEvent/GroupMessageEvent, message nằm ở field "message"
+      const messageResponse = raw.message ?? raw;
+      if (messageResponse.senderId && messageResponse.senderId === user?.id)
+        return; // bỏ qua tin của chính mình
+      const id = messageResponse.messageId;
+      if (id && seenMessageIdsRef.current.has(id)) return; // đã nhận qua kênh khác (topic + user-queue)
+      if (id) seenMessageIdsRef.current.add(id);
+      onMessageRef.current(mapMessageResponse(messageResponse));
     },
     [user?.id],
   );
 
-  /** Subscribe topic của 1 conversation cụ thể — gọi khi user mở 1 đoạn chat */
+  /** Subscribe các topic của 1 conversation cụ thể — gọi khi user mở 1 đoạn chat */
   const subscribeConversation = useCallback(
     (conversationId: string) => {
       if (!conversationId || subscribedConvsRef.current.has(conversationId))
         return;
+
       stompClient.subscribe(
         `/topic/conversations/${conversationId}/messages`,
         (body: any) => {
-          handleIncoming(body.message ?? body);
+          handleIncomingMessage(body);
         },
       );
+
+      stompClient.subscribe(
+        `/topic/conversations/${conversationId}/messages/deleted`,
+        (body: any) => {
+          if (body.messageId)
+            onMessageDeletedRef.current?.(
+              body as MessageDeletedNotificationEvent,
+            );
+        },
+      );
+
       subscribedConvsRef.current.add(conversationId);
     },
-    [handleIncoming],
+    [handleIncomingMessage],
   );
 
   useEffect(() => {
@@ -63,25 +109,20 @@ export function useMessageSocket({
 
     stompClient.connect();
 
-    stompClient.subscribe("/user/queue/pending", (body: any) => {
-      onPendingRef.current?.(body as PendingMessageEvent);
-      const convId = body.messageResponse?.conversationId;
-      if (body.messageResponse) handleIncoming(body.messageResponse);
+    stompClient.subscribe("/user/queue/messages", (body: any) => {
+      handleIncomingMessage(body);
+      const convId = (body.message ?? body).conversationId;
       if (convId) subscribeConversation(convId);
     });
 
-    stompClient.subscribe("/user/queue/messages", (body: any) => {
-      const msg = body.message ?? body;
-      handleIncoming(msg);
-      if (msg.conversationId) subscribeConversation(msg.conversationId);
-    });
-
     return () => {
-      stompClient.unsubscribe("/user/queue/pending");
       stompClient.unsubscribe("/user/queue/messages");
-      subscribedConvsRef.current.forEach((convId) =>
-        stompClient.unsubscribe(`/topic/conversations/${convId}/messages`),
-      );
+      subscribedConvsRef.current.forEach((convId) => {
+        stompClient.unsubscribe(`/topic/conversations/${convId}/messages`);
+        stompClient.unsubscribe(
+          `/topic/conversations/${convId}/messages/deleted`,
+        );
+      });
       subscribedConvsRef.current.clear();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
