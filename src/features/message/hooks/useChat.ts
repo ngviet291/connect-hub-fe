@@ -35,12 +35,18 @@ export const useChat = ({ conversationId, recipientId }: UseChatOptions) => {
     setIsLoading(true);
     try {
       const res = await messageService.getMessages(conversationId);
-      const mapped = res.content.map(mapMessageResponse);
+      // BE trả res.content theo thứ tự DESC (mới nhất trước — dùng cursor
+      // phân trang lùi về quá khứ). Mọi nơi khác trong hook này (gửi tin mới
+      // nối vào CUỐI mảng, nhận tin qua WS nối vào CUỐI, loadMore() nối tin
+      // CŨ hơn vào ĐẦU) đều giả định `messages` theo thứ tự ASC (cũ -> mới,
+      // phần tử cuối luôn là tin mới nhất) để khớp UX chat thường (cuộn xuống
+      // cuối = tin mới nhất) — nên phải đảo ngược lại ở đây trước khi set state.
+      const mapped = [...res.content].reverse().map(mapMessageResponse);
       setMessages(mapped);
       cursorRef.current = res.nextCursor ?? undefined;
       setHasNext(res.hasNext);
       setError(null);
-      const last = res.content[0]; // BE trả mới nhất trước theo cursor DESC
+      const last = res.content[0]; // res.content (chưa đảo) — phần tử đầu vẫn là tin MỚI NHẤT theo thứ tự gốc DESC
       if (last) markConversationRead(conversationId, last.messageId);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to fetch messages");
@@ -92,7 +98,14 @@ export const useChat = ({ conversationId, recipientId }: UseChatOptions) => {
         conversationId,
         cursorRef.current,
       );
-      setMessages((prev) => [...res.content.map(mapMessageResponse), ...prev]);
+      // Cũng như fetchMessages: page "cũ hơn" này BE vẫn trả DESC (mới nhất
+      // của PAGE ĐÓ trước) — phải đảo ngược trước khi ghép vào ĐẦU mảng, nếu
+      // không thứ tự bên trong đoạn vừa nối sẽ bị ngược (mới -> cũ) giữa lòng
+      // 1 mảng đang là cũ -> mới.
+      setMessages((prev) => [
+        ...[...res.content].reverse().map(mapMessageResponse),
+        ...prev,
+      ]);
       cursorRef.current = res.nextCursor ?? undefined;
       setHasNext(res.hasNext);
     } catch (e) {

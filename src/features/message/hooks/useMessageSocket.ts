@@ -1,9 +1,14 @@
 import { useCallback, useEffect, useRef } from "react";
 import { stompClient } from "../../../config/stompClient";
+import {
+  acquireMessageRealtimeBus,
+  subscribeRawMessages,
+} from "./messageRealtimeBus";
 import type {
   AddNewMembersEvent,
   ChatMessage,
   MessageDeletedNotificationEvent,
+  PendingMessageNotificationEvent,
   UpdateMemberRoleEvent,
 } from "../types/message.types";
 import { mapMessageResponse } from "../types/message.types";
@@ -14,6 +19,16 @@ interface UseMessageSocketOptions {
   onMessage: (message: ChatMessage) => void;
   /** Tin nhắn bị xoá (soft-delete) trong 1 conversation đang mở */
   onMessageDeleted?: (event: MessageDeletedNotificationEvent) => void;
+  /**
+   * Tin nhắn PRIVATE đầu tiên từ 1 người CHƯA mutual-follow (myStatus sẽ là
+   * PENDING) — kênh riêng /user/queue/pending.
+   * TODO: BE XÁC NHẬN CHƯA CÓ destination này (subscribe thử làm
+   * ExecutorSubscribableChannel[clientInboundChannel] lỗi) — callback này
+   * tạm thời KHÔNG được gọi tới. Banner "Chấp nhận" trong ChatPage vẫn hoạt
+   * động bình thường vì nó đọc `myStatus` từ REST GET /v1/conversations/{id},
+   * không phụ thuộc event realtime này.
+   */
+  onPending?: (event: PendingMessageNotificationEvent) => void;
   /**
    * Member mới được thêm vào group đang mở.
    * TODO: chưa xác nhận được destination thật cho event này (xem ghi chú
@@ -53,14 +68,17 @@ interface UseMessageSocketOptions {
 export function useMessageSocket({
   onMessage,
   onMessageDeleted,
+  onPending,
 }: UseMessageSocketOptions) {
   const { user } = useAuth();
   const seenMessageIdsRef = useRef(new Set<string>());
   const subscribedConvsRef = useRef(new Set<string>());
   const onMessageRef = useRef(onMessage);
   const onMessageDeletedRef = useRef(onMessageDeleted);
+  const onPendingRef = useRef(onPending);
   onMessageRef.current = onMessage;
   onMessageDeletedRef.current = onMessageDeleted;
+  onPendingRef.current = onPending;
 
   const handleIncomingMessage = useCallback(
     (raw: any) => {
@@ -107,16 +125,20 @@ export function useMessageSocket({
   useEffect(() => {
     if (!user) return;
 
-    stompClient.connect();
-
-    stompClient.subscribe("/user/queue/messages", (body: any) => {
+    // "/user/queue/messages" đi qua bus dùng chung (ref-counted) — tránh ghi
+    // đè handler nếu useConversationsRealtime cũng đang lắng nghe cùng lúc
+    // (xem messageRealtimeBus.ts). "/user/queue/pending" tạm KHÔNG subscribe
+    // (BE chưa có destination này — xem TODO trong messageRealtimeBus.ts).
+    const releaseBus = acquireMessageRealtimeBus();
+    const unsubMessages = subscribeRawMessages((body: any) => {
       handleIncomingMessage(body);
       const convId = (body.message ?? body).conversationId;
       if (convId) subscribeConversation(convId);
     });
 
     return () => {
-      stompClient.unsubscribe("/user/queue/messages");
+      unsubMessages();
+      releaseBus();
       subscribedConvsRef.current.forEach((convId) => {
         stompClient.unsubscribe(`/topic/conversations/${convId}/messages`);
         stompClient.unsubscribe(

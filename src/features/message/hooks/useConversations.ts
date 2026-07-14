@@ -9,6 +9,7 @@ import {
   fetchSuccess,
   fetchFailure,
   markConversationRead as markConversationReadAction,
+  setActiveConversation as setActiveConversationAction,
   selectConversations,
   selectConversationsLoading,
   selectConversationsHasNext,
@@ -29,6 +30,11 @@ export const useConversations = (status?: MemberStatus) => {
   const totalUnread = useSelector(selectTotalUnreadConversations);
   const isLoadingRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
+
+  const setActiveConversation = useCallback(
+    (conversationId: string | null) => dispatch(setActiveConversationAction(conversationId)),
+    [dispatch],
+  );
 
   const refetch = useCallback(async () => {
     isLoadingRef.current = true;
@@ -100,6 +106,7 @@ export const useConversations = (status?: MemberStatus) => {
     error,
     totalUnread,
     markConversationRead,
+    setActiveConversation,
     refetch,
     loadMore,
   };

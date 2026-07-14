@@ -23,6 +23,7 @@ import {
 import { CreatePostModal } from "../../../features/post/components/CreatePostModal";
 import { useNotifications } from "../../../features/notification/hooks/useNotifications";
 import { useConversations } from "../../../features/message/hooks/useConversations";
+import { useConversationsRealtime } from "../../../features/message/hooks/useConversationsRealtime";
 import { SuggestedUsers } from "../../../features/user/components/SuggestedUsers";
 import { TrendingWidget } from "./TrendingWidget";
 
@@ -37,6 +38,12 @@ export const LeftSidebar = () => {
   const [composeOpen, setComposeOpen] = useState(false);
   const { unreadCount } = useNotifications();
   const { totalUnread } = useConversations();
+  // LeftSidebar luôn được mount (kể cả trên mobile — chỉ ẩn bằng CSS "hidden",
+  // không unmount) nên đây là nơi DUY NHẤT giữ 1 subscription WS thật cho
+  // "/user/queue/messages" + "/user/queue/pending" (xem messageRealtimeBus.ts).
+  // Không gọi hook này ở nơi khác (ConversationList, ChatPage...) để tránh
+  // tăng unreadCount / bắn toast pending 2 lần cho cùng 1 sự kiện.
+  useConversationsRealtime();
 
   if (!user) return null;
 

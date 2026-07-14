@@ -45,8 +45,14 @@ export const ConversationList = () => {
               )}
             </div>
             <p className={`truncate text-sm ${c.unreadCount > 0 ? 'font-medium text-text' : 'text-secondary'}`}>
-              {c.lastMessageSenderUsername ? `${c.lastMessageSenderUsername}: ` : ''}
-              {c.lastMessageContent ?? ''}
+              {c.myStatus === 'PENDING' ? (
+                <span className="italic text-accent">{t('pending_conversation_label')}</span>
+              ) : (
+                <>
+                  {c.lastMessageSenderUsername ? `${c.lastMessageSenderUsername}: ` : ''}
+                  {c.lastMessageContent ?? ''}
+                </>
+              )}
             </p>
           </div>
           {c.unreadCount > 0 && <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-accent" />}

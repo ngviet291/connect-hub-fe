@@ -182,6 +182,20 @@ export interface UpdateMemberRoleEvent {
   memberResponse: ConversationMemberResponse;
 }
 
+/**
+ * PendingMessageNotificationEvent.java — đẩy tới /user/{recipientId}/queue/pending khi
+ * người lạ (chưa mutual-follow) gửi tin nhắn PRIVATE đầu tiên. BE tách kênh riêng
+ * (không đi qua /user/queue/messages) để FE phân biệt được "cần Accept" ngay từ
+ * event, không phải suy luận qua conversationStatus.
+ */
+export interface PendingMessageNotificationEvent {
+  senderId: UUID;
+  senderUsername: string;
+  senderAvatarUrl?: string;
+  firstMessagePreview: string;
+  messageResponse: MessageResponse;
+}
+
 // ============================================================================
 // UI-shape — dùng nội bộ trong hook/component, map 1-1 từ response BE.
 // Giữ để không phải sửa lại toàn bộ component UI hiện có, nhưng field
