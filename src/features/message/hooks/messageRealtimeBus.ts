@@ -13,6 +13,10 @@ import type { PendingMessageNotificationEvent } from "../types/message.types";
  * useMessageSocket (ChatPage đang mở) lẫn useConversationsRealtime (cập nhật
  * danh sách hội thoại toàn app).
  *
+ * "/user/queue/notifications" KHÔNG được subscribe ở đây — kênh đó đã thuộc về
+ * useNotificationsRealtime (feature notification), xem bus riêng
+ * (subscribeGroupCreatedNotifications) export từ đó.
+ *
  * TODO: "/user/queue/pending" — BE XÁC NHẬN CHƯA CÓ destination này (không
  * phải lỗi thiếu quyền, mà route không tồn tại; subscribe vào sẽ làm
  * ExecutorSubscribableChannel[clientInboundChannel] bắn lỗi và ảnh hưởng cả
@@ -67,4 +71,75 @@ export function subscribeRawMessages(cb: RawMessageHandler): () => void {
 export function subscribePendingMessages(cb: PendingHandler): () => void {
   pendingListeners.add(cb);
   return () => pendingListeners.delete(cb);
+}
+
+// ============================================================================
+// Bus riêng cho "/topic/conversations/{id}/messages" + ".../messages/deleted"
+// — dùng chung giữa nhiều consumer khác nhau đang cùng quan tâm 1 conversationId
+// (vd: ChatPage đang mở conversation đó, VÀ useConversationsRealtime app-root đã
+// chủ động subscribe sớm từ noti CREATED_GROUP). Cùng lý do với bus ở trên: mỗi
+// destination CHỈ được 1 lần stompClient.subscribe thật, mọi consumer khác phải
+// "ăn ké" qua subscribeConversationTopic() dưới đây, không tự gọi
+// stompClient.subscribe trực tiếp cho các destination này ở nơi khác.
+// ============================================================================
+interface ConversationTopicEntry {
+  refCount: number;
+  teardown: () => void;
+  messageListeners: Set<(body: any) => void>;
+  deletedListeners: Set<(body: any) => void>;
+}
+
+const conversationTopics = new Map<string, ConversationTopicEntry>();
+
+/**
+ * Subscribe "/topic/conversations/{conversationId}/messages" (+ ".../deleted").
+ * Ref-counted theo từng conversationId — nhiều consumer cùng gọi cho cùng 1 id
+ * vẫn chỉ mở 1 subscription thật; unsubscribe thật sự chỉ xảy ra khi consumer
+ * CUỐI CÙNG quan tâm tới conversationId đó rời đi.
+ */
+export function subscribeConversationTopic(
+  conversationId: string,
+  onMessage: (body: any) => void,
+  onDeleted?: (body: any) => void,
+): () => void {
+  let entry = conversationTopics.get(conversationId);
+  if (!entry) {
+    const messageListeners = new Set<(body: any) => void>();
+    const deletedListeners = new Set<(body: any) => void>();
+    stompClient.connect();
+    const unsubMsgs = stompClient.subscribe(
+      `/topic/conversations/${conversationId}/messages`,
+      (body: any) => messageListeners.forEach((cb) => cb(body)),
+    );
+    const unsubDeleted = stompClient.subscribe(
+      `/topic/conversations/${conversationId}/messages/deleted`,
+      (body: any) => deletedListeners.forEach((cb) => cb(body)),
+    );
+    entry = {
+      refCount: 0,
+      teardown: () => {
+        unsubMsgs();
+        unsubDeleted();
+      },
+      messageListeners,
+      deletedListeners,
+    };
+    conversationTopics.set(conversationId, entry);
+  }
+
+  entry.refCount += 1;
+  entry.messageListeners.add(onMessage);
+  if (onDeleted) entry.deletedListeners.add(onDeleted);
+
+  return () => {
+    const e = conversationTopics.get(conversationId);
+    if (!e) return;
+    e.messageListeners.delete(onMessage);
+    if (onDeleted) e.deletedListeners.delete(onDeleted);
+    e.refCount -= 1;
+    if (e.refCount <= 0) {
+      e.teardown();
+      conversationTopics.delete(conversationId);
+    }
+  };
 }

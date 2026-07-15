@@ -202,6 +202,10 @@ export const ChatPage = () => {
     setReplyingTo(null);
 
     if (isNewChat && sent?.conversationId) {
+      // Conversation này chưa từng tồn tại trong Redux (ConversationList lấy
+      // dữ liệu qua GET /v1/conversations, không tự suy ra được từ response
+      // gửi tin) — phải refetch để sidebar hiện ngay, không phải đợi F5.
+      await refetchConversations();
       navigate(`/messages/${sent.conversationId}`, { replace: true });
     }
   };

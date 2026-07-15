@@ -12,6 +12,22 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 let subscriberCount = 0;
 let unsubscribeWs: (() => void) | null = null;
 
+/**
+ * Fan-out riêng cho noti "được thêm vào group" (NotificationType.CREATED_GROUP,
+ * chỉ bắn đúng 1 lần lúc tạo group) — feature `message` (useConversationsRealtime)
+ * cần biết để subscribe sớm vào topic của conversation đó, không cần đợi F5.
+ * KHÔNG tự subscribe "/user/queue/notifications" ở feature message vì destination
+ * này CHỈ được phép có 1 handler thật (đã là handler bên dưới).
+ */
+const groupCreatedListeners = new Set<(noti: NotificationResponse) => void>();
+
+export function subscribeGroupCreatedNotifications(
+  cb: (noti: NotificationResponse) => void,
+): () => void {
+  groupCreatedListeners.add(cb);
+  return () => groupCreatedListeners.delete(cb);
+}
+
 export function useNotificationsRealtime() {
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useAuth();
@@ -47,6 +63,10 @@ export function useNotificationsRealtime() {
                 (c) => c + 1,
               ),
             );
+          }
+
+          if (noti.type === "CREATED_GROUP") {
+            groupCreatedListeners.forEach((cb) => cb(noti));
           }
         },
       );

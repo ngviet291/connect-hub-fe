@@ -9,7 +9,8 @@ export type NotificationType =
   | "MENTION"
   | "SYSTEM"
   | "REPOST"
-  | "MESSAGE_PENDING";
+  | "MESSAGE_PENDING"
+  | "CREATED_GROUP";
 
 export interface NotificationResponse {
   id: UUID;

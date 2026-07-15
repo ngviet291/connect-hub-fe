@@ -3,6 +3,7 @@ import { stompClient } from "../../../config/stompClient";
 import {
   acquireMessageRealtimeBus,
   subscribeRawMessages,
+  subscribeConversationTopic,
 } from "./messageRealtimeBus";
 import type {
   AddNewMembersEvent,
@@ -52,7 +53,8 @@ interface UseMessageSocketOptions {
  * "WebSocket Destinations" (chat module) đã xác nhận:
  *
  *  - /user/queue/messages                       : MessageNotificationEvent (PRIVATE)
- *  - /user/queue/notifications                  : NotificationEvent (mọi loại, kể cả group message khi chưa mở conversation)
+ *  - /user/queue/notifications                  : NotificationEvent (mọi loại, kể cả
+ *                                                  CREATED_GROUP khi được thêm vào group mới)
  *  - /topic/conversations/{id}/messages         : MessageNotificationEvent (PRIVATE) & GroupMessageEvent (GROUP)
  *  - /topic/conversations/{id}/messages/deleted : MessageDeletedNotificationEvent
  *
@@ -64,6 +66,11 @@ interface UseMessageSocketOptions {
  *
  * TODO: hỏi lại BE destination thật cho 2 event trên (nếu có) rồi bật lại
  * onMembersAdded/onMemberRoleUpdated/onAddedToConversation tương ứng.
+ *
+ * subscribeConversation() KHÔNG tự gọi stompClient.subscribe trực tiếp nữa —
+ * đi qua subscribeConversationTopic() (messageRealtimeBus.ts) để an toàn khi
+ * nhiều nơi khác nhau (ChatPage đang mở + useConversationsRealtime app-root đã
+ * subscribe sớm từ noti CREATED_GROUP) cùng quan tâm 1 conversationId.
  */
 export function useMessageSocket({
   onMessage,
@@ -72,7 +79,8 @@ export function useMessageSocket({
 }: UseMessageSocketOptions) {
   const { user } = useAuth();
   const seenMessageIdsRef = useRef(new Set<string>());
-  const subscribedConvsRef = useRef(new Set<string>());
+  // conversationId -> hàm release trả về từ subscribeConversationTopic.
+  const releaseByConvIdRef = useRef(new Map<string, () => void>());
   const onMessageRef = useRef(onMessage);
   const onMessageDeletedRef = useRef(onMessageDeleted);
   const onPendingRef = useRef(onPending);
@@ -94,21 +102,16 @@ export function useMessageSocket({
     [user?.id],
   );
 
-  /** Subscribe các topic của 1 conversation cụ thể — gọi khi user mở 1 đoạn chat */
+  /** Subscribe các topic của 1 conversation cụ thể — gọi khi user mở 1 đoạn chat.
+   *  An toàn gọi nhiều lần cho cùng 1 conversationId, kể cả từ hook instance khác,
+   *  nhờ bus ref-counted trong messageRealtimeBus.ts. */
   const subscribeConversation = useCallback(
     (conversationId: string) => {
-      if (!conversationId || subscribedConvsRef.current.has(conversationId))
+      if (!conversationId || releaseByConvIdRef.current.has(conversationId))
         return;
-
-      stompClient.subscribe(
-        `/topic/conversations/${conversationId}/messages`,
-        (body: any) => {
-          handleIncomingMessage(body);
-        },
-      );
-
-      stompClient.subscribe(
-        `/topic/conversations/${conversationId}/messages/deleted`,
+      const release = subscribeConversationTopic(
+        conversationId,
+        (body: any) => handleIncomingMessage(body),
         (body: any) => {
           if (body.messageId)
             onMessageDeletedRef.current?.(
@@ -116,8 +119,7 @@ export function useMessageSocket({
             );
         },
       );
-
-      subscribedConvsRef.current.add(conversationId);
+      releaseByConvIdRef.current.set(conversationId, release);
     },
     [handleIncomingMessage],
   );
@@ -139,13 +141,8 @@ export function useMessageSocket({
     return () => {
       unsubMessages();
       releaseBus();
-      subscribedConvsRef.current.forEach((convId) => {
-        stompClient.unsubscribe(`/topic/conversations/${convId}/messages`);
-        stompClient.unsubscribe(
-          `/topic/conversations/${convId}/messages/deleted`,
-        );
-      });
-      subscribedConvsRef.current.clear();
+      releaseByConvIdRef.current.forEach((release) => release());
+      releaseByConvIdRef.current.clear();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);

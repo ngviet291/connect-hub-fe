@@ -7,6 +7,7 @@ import { Button } from "../../../shared/components/ui/Button";
 import { MemberPicker } from "./MemberPicker";
 import { conversationService } from "../service/conversationService";
 import { useToast } from "../../../shared/components/ui/Toast";
+import { useConversations } from "../hooks/useConversations";
 
 interface CreateGroupModalProps {
   isOpen: boolean;
@@ -14,10 +15,14 @@ interface CreateGroupModalProps {
 }
 
 /** POST /v1/conversations/group — trước đây có service nhưng không màn hình nào gọi tới. */
-export const CreateGroupModal = ({ isOpen, onClose }: CreateGroupModalProps) => {
+export const CreateGroupModal = ({
+  isOpen,
+  onClose,
+}: CreateGroupModalProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { refetch: refetchConversations } = useConversations();
   const [name, setName] = useState("");
   const [memberIds, setMemberIds] = useState<string[]>([]);
   const [isCreating, setIsCreating] = useState(false);
@@ -42,16 +47,25 @@ export const CreateGroupModal = ({ isOpen, onClose }: CreateGroupModalProps) => 
       });
       reset();
       onClose();
+      // Nhóm vừa tạo chưa có trong Redux (ConversationList chỉ đọc qua GET
+      // /v1/conversations) — refetch để hiện ngay lên sidebar, không cần F5.
+      await refetchConversations();
       navigate(`/messages/${conv.conversationId}`);
     } catch (e) {
-      showToast(e instanceof Error ? e.message : t("group_create_error"), "error");
+      showToast(
+        e instanceof Error ? e.message : t("group_create_error"),
+        "error",
+      );
     } finally {
       setIsCreating(false);
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title={t("create_group_title")}>
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={t("create_group_title")}>
       <div className="flex flex-col gap-4 p-4">
         <Input
           label={t("group_name_label")}
@@ -77,8 +91,7 @@ export const CreateGroupModal = ({ isOpen, onClose }: CreateGroupModalProps) => 
             type="button"
             onClick={handleCreate}
             loading={isCreating}
-            disabled={memberIds.length < 2}
-          >
+            disabled={memberIds.length < 2}>
             {t("create_group_action")}
           </Button>
         </div>
