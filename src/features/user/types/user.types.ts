@@ -9,6 +9,7 @@ export interface UserProfile {
   avatarUrl?: string;
   coverUrl?: string;
   website?: string;
+  phoneNumber?: string;
   roles: UserRole[];
   createdAt: string;
   location?: string;
@@ -26,6 +27,7 @@ export interface UpdateProfileRequest {
   website?: string;
   location?: string;
   avatarUrl?: string;
+  phoneNumber?: string;
 }
 
 export interface UserListEntry {

@@ -3,7 +3,6 @@ export const USER_ENDPOINTS = {
   USER_BY_ID: (id: string) => `/v1/users/${id}`,
   FOLLOWERS_BY_ID: (id: string) => `/v1/admin/users/${id}/followers`,
   FOLLOWING_BY_ID: (id: string) => `/v1/admin/users/${id}/following`,
-  UPDATE_PROFILE: (id: string) => `/v1/users/${id}`,
   USER_BY_USERNAME: (username: string) => `/v1/users/username/${username}`,
   SEARCH: `/v1/users/search`,
   AVATAR_UPLOAD: `/v1/users/avatar/upload`,

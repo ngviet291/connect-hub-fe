@@ -12,10 +12,9 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    allowedHosts:true,
+    allowedHosts: true,
   },
-  	define: {
-  global: "globalThis",
-},
-
+  define: {
+    global: 'globalThis',
+  },
 });
