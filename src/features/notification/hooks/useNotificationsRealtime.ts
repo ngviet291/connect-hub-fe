@@ -13,19 +13,30 @@ let subscriberCount = 0;
 let unsubscribeWs: (() => void) | null = null;
 
 /**
- * Fan-out riêng cho noti "được thêm vào group" (NotificationType.CREATED_GROUP,
- * chỉ bắn đúng 1 lần lúc tạo group) — feature `message` (useConversationsRealtime)
- * cần biết để subscribe sớm vào topic của conversation đó, không cần đợi F5.
- * KHÔNG tự subscribe "/user/queue/notifications" ở feature message vì destination
- * này CHỈ được phép có 1 handler thật (đã là handler bên dưới).
+ * Fan-out cho các noti LIÊN QUAN TỚI 1 CONVERSATION cụ thể — không chỉ
+ * "được thêm vào group" (CREATED_GROUP) mà cả "có tin nhắn mới" (MESSAGE)
+ * và "tin nhắn đầu tiên từ người lạ" (MESSAGE_PENDING).
+ *
+ * BUG ĐÃ SỬA: trước đây chỉ fan-out cho CREATED_GROUP. Giả định là mọi
+ * MESSAGE/MESSAGE_PENDING đều tự trôi qua "/user/queue/messages" (kênh
+ * useConversationsRealtime đã lắng nghe sẵn) nên không cần noti lo thêm —
+ * nhưng trên thực tế có trường hợp kênh đó KHÔNG bắn (hoặc bắn trễ/thiếu),
+ * nên Notification tab đã hiện noti (qua đúng kênh "/user/queue/notifications"
+ * này) nhưng ConversationList/Sidebar không có gì mới cho tới khi F5 (F5 mới
+ * chạy lại REST fetch thật ở useConversations vì cờ `hasFetched` reset).
+ * Giờ: bất kỳ noti nào trong 3 loại trên cũng kích refetch-nếu-thiếu / subscribe
+ * sớm topic của đúng conversation đó — an toàn gọi thừa vì
+ * useConversationsRealtime tự check "đã có trong Redux chưa" trước khi refetch.
  */
-const groupCreatedListeners = new Set<(noti: NotificationResponse) => void>();
+const conversationRelatedListeners = new Set<
+  (noti: NotificationResponse) => void
+>();
 
-export function subscribeGroupCreatedNotifications(
+export function subscribeConversationRelatedNotifications(
   cb: (noti: NotificationResponse) => void,
 ): () => void {
-  groupCreatedListeners.add(cb);
-  return () => groupCreatedListeners.delete(cb);
+  conversationRelatedListeners.add(cb);
+  return () => conversationRelatedListeners.delete(cb);
 }
 
 export function useNotificationsRealtime() {
@@ -65,8 +76,12 @@ export function useNotificationsRealtime() {
             );
           }
 
-          if (noti.type === "CREATED_GROUP") {
-            groupCreatedListeners.forEach((cb) => cb(noti));
+          if (
+            noti.type === "CREATED_GROUP" ||
+            noti.type === "MESSAGE" ||
+            noti.type === "MESSAGE_PENDING"
+          ) {
+            conversationRelatedListeners.forEach((cb) => cb(noti));
           }
         },
       );

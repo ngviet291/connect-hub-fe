@@ -250,7 +250,7 @@ export const ProfilePage = () => {
               {profile.fullName}
             </h1>
             <p className="text-[15px] text-text">
-              {profile.username}
+              @{profile.username}
               {profile.isVerified && (
                 <span className="ml-1 text-primary">✓</span>
               )}

@@ -45,7 +45,6 @@ export const GroupInfoModal = ({
   const [mode, setMode] = useState<"info" | "add-members">("info");
   const [name, setName] = useState(detail.displayName);
   const [isSavingName, setIsSavingName] = useState(false);
-  const [avatarFile, setAvatarFile] = useState<File | undefined>(undefined);
   const [pickedIds, setPickedIds] = useState<string[]>([]);
   const [isAddingMembers, setIsAddingMembers] = useState(false);
   const [busyMemberId, setBusyMemberId] = useState<string | null>(null);
@@ -66,7 +65,6 @@ export const GroupInfoModal = ({
   const handleClose = () => {
     setMode("info");
     setPickedIds([]);
-    setAvatarFile(undefined);
     onClose();
   };
 
@@ -74,11 +72,13 @@ export const GroupInfoModal = ({
     if (!name.trim() || name.trim() === detail.displayName) return;
     setIsSavingName(true);
     try {
+      // Trước đây gửi kèm cả `avatarFile` ở đây — nhưng handleAvatarPick bên
+      // dưới đã tự áp dụng avatar NGAY khi chọn file (gọi updateConversation
+      // riêng), nên gửi lại avatarFile lần nữa ở đây là 1 request thừa (upload
+      // lại đúng avatar vừa upload xong) mỗi khi đổi tên sau khi đổi avatar.
       await conversationService.updateConversation(conversationId, {
         name: name.trim(),
-        avatar: avatarFile,
       });
-      setAvatarFile(undefined);
       onChanged();
       showToast(t("group_update_success"));
     } catch (e) {
@@ -90,7 +90,6 @@ export const GroupInfoModal = ({
 
   const handleAvatarPick = async (file: File | undefined) => {
     if (!file) return;
-    setAvatarFile(file);
     // Đổi avatar áp dụng ngay (không cần chờ bấm lưu tên) — trải nghiệm giống đổi avatar cá nhân.
     try {
       await conversationService.updateConversation(conversationId, { avatar: file });

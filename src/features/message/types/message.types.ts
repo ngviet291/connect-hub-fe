@@ -33,13 +33,25 @@ export type MediaType = "IMAGE" | "VIDEO";
 // Response DTO — khớp field-by-field với dto/response/*.java
 // ============================================================================
 
-/** MediaResponse (post module) — suy ra từ MediaRequest, xác nhận lại khi có source thật */
+/**
+ * MediaResponse (nested trong MessageResponse.media[], trả về từ
+ * POST /v1/chat/messages sau khi gửi tin nhắn) — ĐÃ XÁC NHẬN field thật từ
+ * response thật của BE, KHÔNG giống bộ field suy đoán trước đây:
+ *  - `id` (đoán) -> thực tế là `mediaId`
+ *  - `size` (đoán) -> thực tế là `fileSize`
+ *  - thêm `mimeType` và `publicId` (Cloudinary public_id) mà trước đây
+ *    không biết BE có trả về.
+ * `fileName`/`fileSize`/`mimeType` đều nullable thật sự (thấy `null` trong
+ * response mẫu), không chỉ optional theo kiểu "có thể không có field".
+ */
 export interface MediaResponse {
-  id: UUID;
+  mediaId: UUID;
   url: string;
   type: MediaType;
-  fileName?: string;
-  size?: number;
+  fileName?: string | null;
+  fileSize?: number | null;
+  mimeType?: string | null;
+  publicId?: string;
 }
 
 /** ConversationMemberResponse.java */
@@ -94,13 +106,38 @@ export interface MessageResponse {
   media?: MediaResponse[];
 }
 
+/**
+ * chat/dto/response/MediaUploadResponse.java — trả về từ
+ * POST /v1/chat/messages/media (upload file lấy url thật trước khi gửi tin
+ * nhắn media, xem ChatController.uploadMessageMedia()). Không có `id` (khác
+ * MediaResponse ở trên) vì lúc này media chưa được lưu thành MessageMedia
+ * trong DB, mới chỉ là file đã lên object storage.
+ *
+ * `publicId` (Cloudinary public_id) — XÁC NHẬN từ response thật, PHẢI gửi
+ * lại kèm khi gọi sendMessage (SendMessageRequest.media[].publicId) chứ
+ * không chỉ url/type/fileName/size như suy đoán ban đầu.
+ */
+export interface MediaUploadResponse {
+  url: string;
+  publicId: string;
+  type: MediaType;
+  fileName: string;
+  size: number;
+}
+
 // ============================================================================
 // Request DTO — khớp field-by-field với dto/request/*.java
 // ============================================================================
 
-/** SendMessageRequest.MediaRequest (inner static class) */
+/**
+ * SendMessageRequest.MediaRequest (inner static class) — BUG ĐÃ SỬA: trước
+ * đây thiếu `publicId`. Response thật của POST /v1/chat/messages/media có
+ * trả `publicId` (Cloudinary public_id) và PHẢI gửi lại kèm field này khi
+ * gọi sendMessage, không chỉ url/type/fileName/size như suy đoán ban đầu.
+ */
 export interface MediaRequest {
   url: string;
+  publicId: string;
   type: MediaType;
   fileName?: string;
   size: number;

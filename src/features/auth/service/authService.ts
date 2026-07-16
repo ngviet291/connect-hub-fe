@@ -1,6 +1,8 @@
 import axiosClient from "../../../config/axiosClient";
 import publicClient from "../../../config/publicClient";
 import { store } from "../../../app/store";
+import { stompClient } from "../../../config/stompClient";
+import { notificationApi } from "../../notification/api/notificationApi";
 import {
   setTokens,
   setUser,
@@ -96,7 +98,15 @@ export const authService = {
     } catch (error) {
       throw new Error(getErrorMessage(error, i18n.t("error_logout_failed")));
     } finally {
-      store.dispatch(logoutAction());
+      // BUG ĐÃ SỬA: trước đây chỉ dispatch logoutAction() — Redux vẫn còn
+      // nguyên cache RTK Query của notificationApi (thông báo cũ) và kết nối
+      // WebSocket (stompClient) vẫn cầm JWT của tài khoản vừa logout. Đăng
+      // nhập tài khoản khác trong cùng tab (không reload trang) nên vẫn thấy
+      // thông báo + (trước khi sửa conversationSlice) danh sách hội thoại của
+      // tài khoản cũ, và realtime có thể lệch user cho tới khi F5.
+      store.dispatch(logoutAction()); // conversationSlice tự reset qua extraReducers khi bắt được action này
+      store.dispatch(notificationApi.util.resetApiState());
+      stompClient.disconnect(); // lần login kế tiếp sẽ tự connect() lại với accessToken mới
     }
   },
 

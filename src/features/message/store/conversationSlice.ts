@@ -5,6 +5,7 @@ import type {
   ConversationType,
   MemberStatus,
 } from "../types/message.types";
+import { logout } from "../../auth/store/authSlice";
 
 // Một nguồn state DUY NHẤT cho danh sách hội thoại (Redux) — Sidebar,
 // BottomNav và trang Messages đều đọc/ghi qua slice này, không tạo thêm
@@ -145,6 +146,15 @@ export const conversationSlice = createSlice({
     setActiveConversation(state, { payload }: PayloadAction<string | null>) {
       state.activeConversationId = payload;
     },
+  },
+  extraReducers: (builder) => {
+    // BUG ĐÃ SỬA: trước đây logout() chỉ xoá authSlice, còn conversationSlice
+    // (danh sách hội thoại + unreadCount, dùng chung cho Sidebar/BottomNav/
+    // trang Messages) không hề bị reset — nên đăng nhập tài khoản khác vẫn
+    // thấy nguyên danh sách hội thoại của tài khoản cũ cho tới khi tự F5 hoặc
+    // refetch tay. Reset thẳng về initialState mỗi khi logout được dispatch,
+    // bất kể gọi từ đâu (Sidebar, SettingsLayout...).
+    builder.addCase(logout, () => initialState);
   },
 });
 

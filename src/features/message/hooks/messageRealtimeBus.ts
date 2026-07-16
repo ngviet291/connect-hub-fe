@@ -15,7 +15,7 @@ import type { PendingMessageNotificationEvent } from "../types/message.types";
  *
  * "/user/queue/notifications" KHÔNG được subscribe ở đây — kênh đó đã thuộc về
  * useNotificationsRealtime (feature notification), xem bus riêng
- * (subscribeGroupCreatedNotifications) export từ đó.
+ * (subscribeConversationRelatedNotifications) export từ đó.
  *
  * TODO: "/user/queue/pending" — BE XÁC NHẬN CHƯA CÓ destination này (không
  * phải lỗi thiếu quyền, mà route không tồn tại; subscribe vào sẽ làm
@@ -74,7 +74,7 @@ export function subscribePendingMessages(cb: PendingHandler): () => void {
 }
 
 // ============================================================================
-// Bus riêng cho "/topic/conversations/{id}/messages" + ".../messages/deleted"
+// Bus riêng cho "/topic/conversations/{id}/messages" + ".../event"
 // — dùng chung giữa nhiều consumer khác nhau đang cùng quan tâm 1 conversationId
 // (vd: ChatPage đang mở conversation đó, VÀ useConversationsRealtime app-root đã
 // chủ động subscribe sớm từ noti CREATED_GROUP). Cùng lý do với bus ở trên: mỗi
@@ -92,7 +92,7 @@ interface ConversationTopicEntry {
 const conversationTopics = new Map<string, ConversationTopicEntry>();
 
 /**
- * Subscribe "/topic/conversations/{conversationId}/messages" (+ ".../deleted").
+ * Subscribe "/topic/conversations/{conversationId}/messages" (+ ".../event").
  * Ref-counted theo từng conversationId — nhiều consumer cùng gọi cho cùng 1 id
  * vẫn chỉ mở 1 subscription thật; unsubscribe thật sự chỉ xảy ra khi consumer
  * CUỐI CÙNG quan tâm tới conversationId đó rời đi.
@@ -111,8 +111,17 @@ export function subscribeConversationTopic(
       `/topic/conversations/${conversationId}/messages`,
       (body: any) => messageListeners.forEach((cb) => cb(body)),
     );
+    // BUG ĐÃ SỬA: trước đây subscribe nhầm "/messages/deleted" (đoán theo tên,
+    // KHÔNG xác nhận với BE) — destination đó không tồn tại nên xoá/thu hồi
+    // tin nhắn KHÔNG BAO GIỜ báo realtime cho các thành viên khác trong cuộc
+    // trò chuyện (chỉ người bấm xoá thấy do tự optimistic-update UI local, xem
+    // useChat.recallMessage). Đã xác nhận đúng destination thật từ code BE
+    // (MessageDeletedNotificationHandler): "/topic/conversations/{id}/event"
+    // — số NHIỀU "conversations" (khác hẳn "/topic/conversation/{id}/event" số
+    // ÍT đã bị gỡ trước đó vì BE deny — 2 path này KHÁC NHAU, không phải cùng 1
+    // chỗ đã thử rồi thất bại).
     const unsubDeleted = stompClient.subscribe(
-      `/topic/conversations/${conversationId}/messages/deleted`,
+      `/topic/conversations/${conversationId}/event`,
       (body: any) => deletedListeners.forEach((cb) => cb(body)),
     );
     entry = {

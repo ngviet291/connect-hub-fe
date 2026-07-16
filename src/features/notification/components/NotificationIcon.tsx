@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import type { NotificationType } from "../types/notification.types";
 import { FaAt, FaBell, FaCommentDots, FaHeart, FaUserPlus } from "react-icons/fa";
 import { IoChatbubbleEllipses } from "react-icons/io5";
-import { FaRepeat } from "react-icons/fa6";
+import { FaRepeat, FaUserGroup } from "react-icons/fa6";
 
 export const NotificationIcon = ({ type }: { type: NotificationType }) => {
   const map: Record<NotificationType, { icon: ReactNode; bg: string }> = {
@@ -38,6 +38,15 @@ export const NotificationIcon = ({ type }: { type: NotificationType }) => {
     REPOST: {
       icon: <FaRepeat size={16} />,
       bg: "bg-emerald-500/15 text-emerald-500",
+    },
+    // Trước đây THIẾU case này dù "CREATED_GROUP" đã có trong NotificationType
+    // (dùng ở useNotificationsRealtime.ts) -> map[type] trả undefined -> dòng
+    // "const { icon, bg } = map[type]" bên dưới throw "Cannot destructure
+    // property 'icon' of undefined" mỗi khi có noti loại này render ra danh
+    // sách (crash cả NotificationDropdown lẫn NotificationsPage).
+    CREATED_GROUP: {
+      icon: <FaUserGroup size={16} />,
+      bg: "bg-violet-500/15 text-violet-500",
     },
     SYSTEM: {
       icon: <FaBell size={16} />,

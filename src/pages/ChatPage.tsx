@@ -97,6 +97,7 @@ export const ChatPage = () => {
   // nhắn mới tới đúng lúc mình đang mở sẵn cuộc trò chuyện đó.
   useEffect(() => {
     setActiveConversation(conversationId ?? null);
+    setLocallyAccepted(false); // đổi sang conversation khác -> reset trạng thái optimistic cũ
     return () => {
       setActiveConversation(null);
     };
@@ -125,6 +126,10 @@ export const ChatPage = () => {
 
   const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
   const [isAccepting, setIsAccepting] = useState(false);
+  // Ẩn banner "Chấp nhận" NGAY khi bắt đầu accept (bấm nút hoặc tự accept lúc
+  // gửi tin), không đợi refetchDetail() trả về mới ẩn — tránh banner còn nháy
+  // 1 nhịp sau khi người dùng đã gửi tin (rõ ràng là đã "chấp nhận" trò chuyện rồi).
+  const [locallyAccepted, setLocallyAccepted] = useState(false);
   const [showGroupInfo, setShowGroupInfo] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -173,9 +178,19 @@ export const ChatPage = () => {
     }
   };
 
-  const handleAccept = async () => {
+  // myStatus PENDING (và không phải chat mới) nghĩa là NGƯỜI KHÁC đã gửi tin
+  // đầu tiên cho mình, đang chờ mình chấp nhận (xem PendingMessageNotificationEvent).
+  // `!locallyAccepted` để banner ẩn NGAY khi bắt đầu accept, không phải đợi
+  // refetchDetail() round-trip xong mới ẩn (xem khai báo state ở trên).
+  const isPendingForMe =
+    !isNewChat &&
+    detail?.type === "PRIVATE" &&
+    detail?.myStatus === "PENDING" &&
+    !locallyAccepted;
+
+  const acceptPendingConversation = async () => {
     if (!conversationId || !user?.id) return;
-    setIsAccepting(true);
+    setLocallyAccepted(true); // ẩn banner ngay, trước khi request kịp trả về
     try {
       await conversationService.acceptConversation({
         conversationId,
@@ -183,6 +198,16 @@ export const ChatPage = () => {
       });
       await refetchDetail();
       await refetchConversations();
+    } catch (e) {
+      setLocallyAccepted(false); // request lỗi thật -> khôi phục banner để người dùng thử lại
+      throw e;
+    }
+  };
+
+  const handleAccept = async () => {
+    setIsAccepting(true);
+    try {
+      await acceptPendingConversation();
       showToast(t("accept_conversation_success"));
     } catch (e) {
       showToast(
@@ -194,19 +219,61 @@ export const ChatPage = () => {
     }
   };
 
-  const handleSend = async (text: string, media?: PendingAttachment[]) => {
-    const mediaRequests = media?.length
-      ? await uploadAttachments(media)
-      : undefined;
-    const sent = await sendMessage(text, mediaRequests, replyingTo?.id);
-    setReplyingTo(null);
+  const handleSend = async (
+    text: string,
+    media?: PendingAttachment[],
+    onUploadProgress?: (percent: number) => void,
+  ): Promise<boolean> => {
+    // Trước đây không try/catch: nếu upload hoặc gửi tin lỗi (mất mạng...),
+    // lỗi văng thẳng ra ngoài — MessageInput đã lỡ xoá nội dung đang gõ (xoá
+    // ngay khi bấm gửi, không chờ kết quả) và người dùng không hề được báo lỗi,
+    // mất luôn tin nhắn vừa gõ. Giờ bắt lỗi, báo toast, và trả về false để
+    // MessageInput biết GIỮ NGUYÊN nội dung cho người dùng gửi lại.
+    try {
+      // BUG ĐÃ SỬA: trước đây myStatus == PENDING (người khác nhắn trước,
+      // mình chưa bấm "Chấp nhận") vẫn cho gửi tin bình thường qua ô nhập —
+      // input chỉ bị khoá bởi isSending/isCheckingExisting, không hề check
+      // isPendingForMe. Giờ: gửi tin lúc đang PENDING sẽ tự động accept
+      // trước (thay vì chặn hẳn), vì hành động gửi tin chính là tín hiệu
+      // "tôi đồng ý trò chuyện" — không bắt người dùng phải bấm nút Accept
+      // riêng nữa. Accept lỗi thì dừng luôn, không gửi tin.
+      if (isPendingForMe) {
+        await acceptPendingConversation();
+      }
 
-    if (isNewChat && sent?.conversationId) {
-      // Conversation này chưa từng tồn tại trong Redux (ConversationList lấy
-      // dữ liệu qua GET /v1/conversations, không tự suy ra được từ response
-      // gửi tin) — phải refetch để sidebar hiện ngay, không phải đợi F5.
-      await refetchConversations();
-      navigate(`/messages/${sent.conversationId}`, { replace: true });
+      const mediaRequests = media?.length
+        ? await uploadAttachments(media, onUploadProgress)
+        : undefined;
+      const sent = await sendMessage(text, mediaRequests, replyingTo?.id);
+      setReplyingTo(null);
+
+      if (isNewChat && sent?.conversationId) {
+        // Conversation này chưa từng tồn tại trong Redux (ConversationList lấy
+        // dữ liệu qua GET /v1/conversations, không tự suy ra được từ response
+        // gửi tin) — phải refetch để sidebar hiện ngay, không phải đợi F5.
+        await refetchConversations();
+        navigate(`/messages/${sent.conversationId}`, { replace: true });
+      }
+      return true;
+    } catch (e) {
+      showToast(
+        e instanceof Error ? e.message : t("send_message_error"),
+        "error",
+      );
+      return false;
+    }
+  };
+
+  const handleRecall = async (messageId: string) => {
+    try {
+      await recallMessage(messageId);
+    } catch (e) {
+      // recallMessage giờ tự rollback UI khi lỗi (xem useChat) và throw lại để
+      // báo cho người dùng biết thao tác không thành công, không chỉ âm thầm sai lệch.
+      showToast(
+        e instanceof Error ? e.message : t("recall_message_error"),
+        "error",
+      );
     }
   };
 
@@ -220,10 +287,6 @@ export const ChatPage = () => {
     : peerMember?.username;
   const showHeader = isNewChat ? !!targetUser : !isDetailLoading && !!detail;
   const isGroup = !isNewChat && detail?.type === "GROUP";
-  // myStatus PENDING (và không phải chat mới) nghĩa là NGƯỜI KHÁC đã gửi tin
-  // đầu tiên cho mình, đang chờ mình chấp nhận (xem PendingMessageNotificationEvent).
-  const isPendingForMe =
-    !isNewChat && detail?.type === "PRIVATE" && detail?.myStatus === "PENDING";
 
   return (
     <div className="flex h-full flex-col">
@@ -322,7 +385,7 @@ export const ChatPage = () => {
                   message={m}
                   participant={participant}
                   onReply={setReplyingTo}
-                  onRecall={recallMessage}
+                  onRecall={handleRecall}
                 />
               );
             })}

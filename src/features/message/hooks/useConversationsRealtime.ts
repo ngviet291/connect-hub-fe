@@ -11,10 +11,13 @@ import { upsertConversationSummary } from "../store/conversationSlice";
 import { useConversations } from "./useConversations";
 import {
   useNotificationsRealtime,
-  subscribeGroupCreatedNotifications,
+  subscribeConversationRelatedNotifications,
 } from "@/features/notification/hooks/useNotificationsRealtime";
 import type { NotificationResponse } from "@/features/notification/types/notification.types";
-import type { GroupMessageEvent, MessageResponse } from "../types/message.types";
+import type {
+  GroupMessageEvent,
+  MessageResponse,
+} from "../types/message.types";
 
 /**
  * Cập nhật danh sách hội thoại (Sidebar, BottomNav, MessagesPage) theo thời
@@ -27,7 +30,7 @@ import type { GroupMessageEvent, MessageResponse } from "../types/message.types"
  *    bắn ĐÚNG 1 lần lúc tạo group, tới mọi member. Kênh WS đó đã bị
  *    useNotificationsRealtime (feature notification) subscribe riêng cho
  *    chuông thông báo — destination chỉ được phép có 1 handler thật, nên ở
- *    đây KHÔNG subscribe lại mà "ăn ké" qua subscribeGroupCreatedNotifications()
+ *    đây KHÔNG subscribe lại mà "ăn ké" qua subscribeConversationRelatedNotifications()
  *    (bus nội bộ feature notification export ra).
  *
  *    Khi nhận noti này: (1) subscribe NGAY vào
@@ -122,7 +125,8 @@ export function useConversationsRealtime() {
      *  khi tin nhắn thật tới). */
     const handleGroupTopicMessage = (conversationId: string) => (raw: any) => {
       const event = raw as GroupMessageEvent;
-      const message: MessageResponse | undefined = event.message ?? raw.message ?? raw;
+      const message: MessageResponse | undefined =
+        event.message ?? raw.message ?? raw;
       if (!message?.messageId) return;
       const isMine = message.senderId === user.id;
       const isActive = activeConversationId === conversationId;
@@ -154,17 +158,26 @@ export function useConversationsRealtime() {
       topicReleasesRef.current.set(conversationId, release);
     };
 
-    const unsubGroupCreated = subscribeGroupCreatedNotifications(
+    const unsubConversationRelated = subscribeConversationRelatedNotifications(
       (noti: NotificationResponse) => {
         const conversationId = extractConversationIdFromTargetUrl(
           noti.targetUrl,
         );
         if (!conversationId) return;
 
-        // Subscribe ngay từ noti "được thêm vào group" — mọi tin nhắn GROUP
-        // tới sau chảy thẳng qua topic, không cần noti riêng cho từng tin nữa.
+        // Subscribe ngay topic của conversation này — nếu là group thì mọi
+        // tin nhắn tới sau chảy thẳng qua topic; nếu là PRIVATE thì đây chỉ
+        // là lớp phòng hờ thêm (bình thường đã có "/user/queue/messages" lo),
+        // subscribe thừa không hại gì vì đã ref-counted theo conversationId.
         subscribeToGroupTopic(conversationId);
 
+        // BUG ĐÃ SỬA: trước đây fallback refetch-nếu-thiếu này CHỈ chạy cho
+        // CREATED_GROUP. Với MESSAGE/MESSAGE_PENDING (nhận tin từ ai đó, kể cả
+        // người lạ) thì trước giờ hoàn toàn dựa vào "/user/queue/messages" để
+        // tự upsert — nhưng nếu vì lý do gì đó kênh đó không bắn kịp/thiếu,
+        // Notification tab vẫn hiện noti bình thường (noti đi qua kênh khác)
+        // trong khi ConversationList/Sidebar im lìm tới khi F5. Giờ mọi noti
+        // liên quan tới 1 conversation đều tự refetch nếu Redux còn thiếu nó.
         if (
           conversationsRef.current.some(
             (c) => c.conversationId === conversationId,
@@ -181,7 +194,7 @@ export function useConversationsRealtime() {
 
     return () => {
       unsubMessages();
-      unsubGroupCreated();
+      unsubConversationRelated();
       releaseBus();
       // KHÔNG release topicReleasesRef ở đây — xem comment ở khai báo ref.
     };

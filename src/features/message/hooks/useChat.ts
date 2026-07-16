@@ -145,8 +145,14 @@ export const useChat = ({ conversationId, recipientId }: UseChatOptions) => {
   /**
    * BE không có API "thu hồi" riêng — chỉ có xoá mềm (DELETE /v1/messages/{id},
    * status chuyển DELETED). FE hiển thị y hệt UX "recalled" cũ dựa vào status đó.
+   *
+   * Optimistic update trước cho mượt, nhưng PHẢI rollback nếu request thất bại
+   * (mất mạng, hết quyền...) — trước đây không rollback nên nếu BE trả lỗi,
+   * tin nhắn vẫn hiển thị "đã thu hồi" trên máy người gửi dù thực ra vẫn còn
+   * nguyên trên server, tạo trạng thái sai lệch cho tới khi F5/refetch lại.
    */
   const recallMessage = async (messageId: string) => {
+    const previous = messages;
     setMessages((prev) =>
       prev.map((m) =>
         m.id === messageId
@@ -154,7 +160,15 @@ export const useChat = ({ conversationId, recipientId }: UseChatOptions) => {
           : m,
       ),
     );
-    await messageService.deleteMessage(messageId);
+    try {
+      await messageService.deleteMessage(messageId);
+    } catch (e) {
+      setMessages(previous); // rollback về đúng nội dung/trạng thái cũ
+      setError(
+        e instanceof Error ? e.message : "Failed to recall message",
+      );
+      throw e; // để caller (UI) có thể hiện toast lỗi nếu muốn
+    }
   };
 
   return {

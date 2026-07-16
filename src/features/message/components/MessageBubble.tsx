@@ -4,7 +4,10 @@ import { useAuth } from "../../auth/hooks/useAuth";
 import { useTranslation } from "react-i18next";
 import type { ChatMessage } from "../types/message.types";
 import type { PostAuthor } from "../../post/types/post.types";
-import { ReplyIcon, MoreHorizontalIcon } from "../../../shared/components/icons/Icons";
+import {
+  ReplyIcon,
+  MoreHorizontalIcon,
+} from "../../../shared/components/icons/Icons";
 import { Dropdown } from "../../../shared/components/ui/Dropdown";
 import { ConfirmModal } from "../../../shared/components/ui/ConfirmModal";
 import { Avatar } from "../../../shared/components/ui/Avatar";
@@ -30,9 +33,15 @@ export const MessageBubble = ({
 
   if (message.recalled) {
     return (
-      <div className={`flex items-end gap-2 ${isMine ? "justify-end" : "justify-start"} animate-fade-in`}>
+      <div
+        className={`flex items-end gap-2 ${isMine ? "justify-end" : "justify-start"} animate-fade-in`}>
         {!isMine && (
-          <Avatar src={participant.avatarUrl} name={participant.fullName} size="xs" onClick={goToProfile} />
+          <Avatar
+            src={participant.avatarUrl}
+            name={participant.fullName}
+            size="xs"
+            onClick={goToProfile}
+          />
         )}
         <p className="max-w-[75%] rounded-2xl border border-border px-4 py-2.5 text-sm italic text-secondary">
           {t("message_recalled")}
@@ -42,29 +51,51 @@ export const MessageBubble = ({
   }
 
   return (
-    <div className={`group flex items-end gap-2 ${isMine ? "justify-end" : "justify-start"} animate-fade-in`}>
+    <div
+      className={`group flex items-end gap-2 ${isMine ? "justify-end" : "justify-start"} animate-fade-in`}>
       {!isMine && (
-        <Avatar src={participant.avatarUrl} name={participant.fullName} size="xs" onClick={goToProfile} />
+        <Avatar
+          src={participant.avatarUrl}
+          name={participant.fullName}
+          size="xs"
+          onClick={goToProfile}
+        />
       )}
-      <div className={`flex max-w-[75%] items-center gap-1.5 ${isMine ? "flex-row-reverse" : "flex-row"}`}>
+      <div
+        className={`flex max-w-[75%] items-center gap-1.5 ${isMine ? "flex-row-reverse" : "flex-row"}`}>
         <div
           className={`overflow-hidden rounded-2xl ${
-            isMine ? "rounded-br-md bg-primary text-white" : "rounded-bl-md border border-border bg-surface-hover text-text"
-          } ${hasMedia ? "p-1.5" : "px-4 py-2.5"}`}
-        >
+            isMine
+              ? "rounded-br-md bg-primary text-white"
+              : "rounded-bl-md border border-border bg-surface-hover text-text"
+          } ${hasMedia ? "p-1.5" : "px-4 py-2.5"}`}>
           {hasMedia && (
-            <div className={`grid gap-1 ${message.media!.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
+            <div
+              className={`grid gap-1 ${message.media!.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
               {message.media!.map((m) =>
                 m.type === "VIDEO" ? (
-                  <video key={m.id} src={m.url} controls className="max-h-64 w-full rounded-xl object-cover" />
+                  <video
+                    key={m.mediaId}
+                    src={m.url}
+                    controls
+                    className="max-h-64 w-full rounded-xl object-cover"
+                  />
                 ) : (
-                  <img key={m.id} src={m.url} alt="" className="max-h-64 w-full rounded-xl object-cover" />
+                  <img
+                    key={m.mediaId}
+                    src={m.url}
+                    alt=""
+                    className="max-h-64 w-full rounded-xl object-cover"
+                  />
                 ),
               )}
             </div>
           )}
           {message.content && (
-            <p className={`text-[15px] leading-relaxed ${hasMedia ? "px-2 pb-1 pt-2" : ""}`}>{message.content}</p>
+            <p
+              className={`text-[15px] leading-relaxed ${hasMedia ? "px-2 pb-1 pt-2" : ""}`}>
+              {message.content}
+            </p>
           )}
         </div>
 
@@ -74,8 +105,7 @@ export const MessageBubble = ({
           <button
             onClick={() => onReply(message)}
             title={t("reply_action")}
-            className="cursor-pointer rounded-full p-1.5 text-secondary hover:bg-surface-hover hover:text-text"
-          >
+            className="cursor-pointer rounded-full p-1.5 text-secondary hover:bg-surface-hover hover:text-text">
             <ReplyIcon size={16} />
           </button>
           {isMine && (
@@ -84,8 +114,7 @@ export const MessageBubble = ({
               trigger={
                 <button
                   title={t("recall_action")}
-                  className="cursor-pointer rounded-full p-1.5 text-secondary hover:bg-surface-hover hover:text-text"
-                >
+                  className="cursor-pointer rounded-full p-1.5 text-secondary hover:bg-surface-hover hover:text-text">
                   <MoreHorizontalIcon size={16} />
                 </button>
               }

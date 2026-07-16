@@ -50,8 +50,7 @@ export const SettingsLayout = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate(-1)}
-            className="-ml-1.5 cursor-pointer rounded-full p-1.5 hover:bg-surface-hover md:hidden"
-          >
+            className="-ml-1.5 cursor-pointer rounded-full p-1.5 hover:bg-surface-hover md:hidden">
             <ArrowLeftIcon size={20} />
           </button>
           <Link to="/" className="cursor-pointer md:hidden">
@@ -73,8 +72,7 @@ export const SettingsLayout = () => {
             <NavLink
               key={to}
               to={to}
-              className="flex cursor-pointer items-center gap-3 border-b border-border px-4 py-3.5 text-sm font-medium text-text hover:bg-surface-hover"
-            >
+              className="flex cursor-pointer items-center gap-3 border-b border-border px-4 py-3.5 text-sm font-medium text-text hover:bg-surface-hover">
               <Icon size={18} />
               <span className="flex-1">{label}</span>
               <ChevronRightIcon size={16} className="text-secondary" />
@@ -82,8 +80,7 @@ export const SettingsLayout = () => {
           ))}
           <button
             onClick={() => authService.logout()}
-            className="cursor-pointer border-b border-border px-4 py-3.5 text-left text-sm font-semibold text-danger hover:bg-surface-hover"
-          >
+            className="cursor-pointer border-b border-border px-4 py-3.5 text-left text-sm font-semibold text-danger hover:bg-surface-hover">
             {t("nav_logout")}
           </button>
         </nav>
@@ -101,8 +98,7 @@ export const SettingsLayout = () => {
                   ? "bg-primary/10 text-primary"
                   : "text-secondary hover:bg-surface-hover hover:text-text"
               }`
-            }
-          >
+            }>
             <Icon size={16} /> {label}
           </NavLink>
         ))}
@@ -116,8 +112,7 @@ export const SettingsLayout = () => {
       <div className="hidden border-t border-border p-4 md:block">
         <button
           onClick={() => authService.logout()}
-          className="cursor-pointer text-sm font-semibold text-danger hover:underline"
-        >
+          className="cursor-pointer text-sm font-semibold text-danger hover:underline">
           {t("nav_logout")}
         </button>
       </div>

@@ -52,16 +52,22 @@ interface UseMessageSocketOptions {
  * Quản lý toàn bộ WebSocket realtime cho chat, khớp đúng tài liệu
  * "WebSocket Destinations" (chat module) đã xác nhận:
  *
- *  - /user/queue/messages                       : MessageNotificationEvent (PRIVATE)
- *  - /user/queue/notifications                  : NotificationEvent (mọi loại, kể cả
- *                                                  CREATED_GROUP khi được thêm vào group mới)
- *  - /topic/conversations/{id}/messages         : MessageNotificationEvent (PRIVATE) & GroupMessageEvent (GROUP)
- *  - /topic/conversations/{id}/messages/deleted : MessageDeletedNotificationEvent
+ *  - /user/queue/messages               : MessageNotificationEvent (PRIVATE)
+ *  - /user/queue/notifications          : NotificationEvent (mọi loại, kể cả
+ *                                          CREATED_GROUP khi được thêm vào group mới)
+ *  - /topic/conversations/{id}/messages : MessageNotificationEvent (PRIVATE) & GroupMessageEvent (GROUP)
+ *  - /topic/conversations/{id}/event    : MessageDeletedNotificationEvent — XÁC NHẬN
+ *                                          từ code handler BE thật (không còn suy đoán).
+ *                                          BUG ĐÃ SỬA: trước đây subscribe nhầm
+ *                                          "/topic/conversations/{id}/messages/deleted"
+ *                                          (đoán tên, không tồn tại) nên xoá/thu hồi tin
+ *                                          nhắn không hề báo realtime cho người nhận.
  *
  * ĐÃ GỠ (không còn khớp tài liệu, từng bị BE deny "Failed to authorize
  * message... granted=false" vì không phải rule thiếu mà destination không
- * tồn tại thật sự):
- *  - "/topic/conversation/{id}/event" (số ít) — dùng cho AddNewMembersEvent/UpdateMemberRoleEvent
+ * tồn tại thật sự) — LƯU Ý 2 path này KHÁC với "/topic/conversations/{id}/event"
+ * (số NHIỀU "conversations") đã xác nhận ở trên, không phải cùng 1 chỗ:
+ *  - "/topic/conversation/{id}/event" (số ÍT "conversation") — dùng cho AddNewMembersEvent/UpdateMemberRoleEvent
  *  - "/user/queue/conversations" — dùng cho onAddedToConversation
  *
  * TODO: hỏi lại BE destination thật cho 2 event trên (nếu có) rồi bật lại

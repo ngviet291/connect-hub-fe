@@ -26,6 +26,7 @@ export const MESSAGE_ENDPOINTS = {
 
   // ── ChatController ──────────────────────────────────────────────
   SEND_MESSAGE: "/v1/chat/messages",
+  UPLOAD_MESSAGE_MEDIA: "/v1/chat/messages/media",
   MARK_AS_READ: (conversationId: string) => `/v1/chat/${conversationId}/read`,
 
   // ── MessageController ───────────────────────────────────────────
