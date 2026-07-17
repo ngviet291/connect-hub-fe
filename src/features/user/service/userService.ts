@@ -22,10 +22,7 @@ export const userService = {
     }
   },
 
-  // _username giữ lại để tương thích chữ ký cũ (EditProfileModal truyền vào),
-  // BE xác định user hiện tại qua token nên không cần dùng tới.
   updateProfile: async (
-    _username: string,
     request: UpdateProfileRequest,
   ): Promise<UserProfile> => {
     try {
@@ -34,7 +31,30 @@ export const userService = {
         request,
       );
       const data = res.data;
-      if (data.code !== 7001) {
+      if (data.code !== 3005 ) {
+        throw new Error(data.message || i18n.t("error_update_profile"));
+      }
+      return data.data;
+    } catch (error) {
+      throw new Error(getErrorMessage(error, i18n.t("error_update_profile")));
+    }
+  },
+
+  uploadAvatar: async (file: File): Promise<UserProfile> => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await axiosClient.put<ApiResponse<UserProfile>>(
+        USER_ENDPOINTS.AVATAR,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        },
+      );
+
+      const data = res.data;
+      if (data.code !== 7001 && data.code !== 7000) {
         throw new Error(data.message || i18n.t("error_update_profile"));
       }
       return data.data;

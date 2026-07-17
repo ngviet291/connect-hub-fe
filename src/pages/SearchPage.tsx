@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Input } from "../shared/components/ui/Input";
 import { SearchIcon } from "../shared/components/icons/Icons";
@@ -7,37 +7,16 @@ import { UserRowSkeleton } from "../shared/components/ui/Skeleton";
 import { EmptyState } from "../shared/components/ui/EmptyState";
 import { TrendingWidget } from "../shared/components/layout/TrendingWidget";
 import { useDebounce } from "../shared/hooks/useDebounce";
-import type { UserProfile } from "../features/user/types/user.types";
 import { useTranslation } from "react-i18next";
-import { followService, type UserSummaryResponse } from "@/features/follow";
+import { useSearchUsers } from "@/features/search";
+import { PostCard } from "../features/post/components/PostCard";
 
 export const SearchPage = () => {
   const { t } = useTranslation();
   const [params] = useSearchParams();
   const [query, setQuery] = useState(params.get("q") ?? "");
   const debounced = useDebounce(query, 350);
-  const [results, setResults] = useState<UserProfile[] | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (!debounced.trim()) {
-      setResults(null);
-      return;
-    }
-    setIsLoading(true);
-  }, [debounced]);
-
-  const toggleFollow = async (u: UserSummaryResponse) => {
-    setResults(
-      (prev) =>
-        prev?.map((x) =>
-          x.id === u.id ? { ...x, isFollowing: !x.isFollowing } : x,
-        ) ?? null,
-    );
-    u.isFollowing
-      ? await followService.unfollow(u.id)
-      : await followService.follow(u.id);
-  };
+  const { users, posts, hashtags, isLoading, error, toggleFollow } = useSearchUsers(debounced);
 
   return (
     <div className="animate-fade-in">
@@ -60,7 +39,7 @@ export const SearchPage = () => {
       {isLoading &&
         Array.from({ length: 4 }).map((_, i) => <UserRowSkeleton key={i} />)}
 
-      {!isLoading && query.trim() && results?.length === 0 && (
+      {!isLoading && query.trim() && users.length === 0 && posts.length === 0 && hashtags.length === 0 && !error && (
         <EmptyState
           icon={<SearchIcon size={32} />}
           title={t("no_results_title")}
@@ -68,10 +47,42 @@ export const SearchPage = () => {
         />
       )}
 
-      {!isLoading &&
-        results?.map((u) => (
-          <UserListItem key={u.id} user={u} onToggleFollow={toggleFollow} />
-        ))}
+      {error && query.trim() && (
+        <div className="px-4 py-6 text-sm text-danger">{error}</div>
+      )}
+
+      {!isLoading && (
+        <>
+          {users.length > 0 && (
+            <div className="border-b border-border">
+              <div className="px-4 py-2 text-sm font-semibold text-secondary">Users</div>
+              {users.map((u) => (
+                <UserListItem key={u.id} user={u} onToggleFollow={toggleFollow} />
+              ))}
+            </div>
+          )}
+
+          {posts.length > 0 && (
+            <div className="border-b border-border">
+              <div className="px-4 py-2 text-sm font-semibold text-secondary">Posts</div>
+              {posts.map((post) => (
+                <PostCard key={post.id} post={post} />
+              ))}
+            </div>
+          )}
+
+          {hashtags.length > 0 && (
+            <div>
+              <div className="px-4 py-2 text-sm font-semibold text-secondary">Hashtags</div>
+              {hashtags.map((tag) => (
+                <div key={tag.id} className="border-b border-border px-4 py-3 text-sm text-text">
+                  #{tag.name}
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };
