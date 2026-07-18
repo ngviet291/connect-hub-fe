@@ -4,6 +4,9 @@ export const USER_ENDPOINTS = {
   FOLLOWERS_BY_ID: (id: string) => `/v1/admin/users/${id}/followers`,
   FOLLOWING_BY_ID: (id: string) => `/v1/admin/users/${id}/following`,
   USER_BY_USERNAME: (username: string) => `/v1/users/username/${username}`,
+  FOLLOW_USER: (id: string) => `/v1/users/${id}/follow`,
+  UNFOLLOW_USER: (id: string) => `/v1/users/${id}/unfollow`,
+
   SEARCH: `/v1/users/search`,
   AVATAR_UPLOAD: `/v1/users/avatar/upload`,
   AVATAR_DELETE: `/v1/users/avatar/delete`,

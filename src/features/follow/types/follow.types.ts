@@ -16,8 +16,8 @@ export interface UserStats {
 }
 
 export interface FollowResponse {
-  followerId: UUID;
-  followingId: UUID;
+  followerId?: UUID;
+  followingId?: UUID;
   success: boolean;
 }
 

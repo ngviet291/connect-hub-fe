@@ -10,18 +10,29 @@ import type {
   UserSummaryResponse,
 } from "../types/follow.types";
 import { FOLLOW_ENDPOINTS } from "../util/FollowEndpoint";
+import { USER_ENDPOINTS } from "../../user/util/UserEndpoints";
 
 export const followService = {
   follow: async (targetUserId: string): Promise<FollowResponse> => {
     try {
-      const res = await axiosClient.post<ApiResponse<FollowResponse>>(
-        FOLLOW_ENDPOINTS.FOLLOW(targetUserId),
+      const res = await axiosClient.post<ApiResponse<FollowResponse | null>>(
+        USER_ENDPOINTS.FOLLOW_USER(targetUserId),
       );
       const data = res.data;
-      if (!data || data.code !== 3003 || !data.data) {
-        throw new Error(getErrorMessage(data.message, "Failed to follow user"));
+      if (!data || ![200, 3003].includes(data.code)) {
+        throw new Error(getErrorMessage(data?.message, "Failed to follow user"));
       }
-      return data.data;
+      const result = data.data ?? { success: true };
+      try {
+        window.dispatchEvent(
+          new CustomEvent("follow-changed", {
+            detail: { userId: targetUserId, isFollowing: true },
+          }),
+        );
+      } catch (e) {
+        // ignore in non-browser environments
+      }
+      return result;
     } catch (error) {
       throw new Error(getErrorMessage(error, "Failed to follow user"));
     }
@@ -29,16 +40,26 @@ export const followService = {
 
   unfollow: async (targetUserId: string): Promise<FollowResponse> => {
     try {
-      const res = await axiosClient.delete<ApiResponse<FollowResponse>>(
-        FOLLOW_ENDPOINTS.UNFOLLOW(targetUserId),
+      const res = await axiosClient.delete<ApiResponse<FollowResponse | null>>(
+        USER_ENDPOINTS.UNFOLLOW_USER(targetUserId),
       );
       const data = res.data;
-      if (!data || data.code !== 3004 || !data.data) {
+      if (!data || ![200, 3004].includes(data.code)) {
         throw new Error(
-          getErrorMessage(data.message, "Failed to unfollow user"),
+          getErrorMessage(data?.message, "Failed to unfollow user"),
         );
       }
-      return data.data;
+      const result = data.data ?? { success: true };
+      try {
+        window.dispatchEvent(
+          new CustomEvent("follow-changed", {
+            detail: { userId: targetUserId, isFollowing: false },
+          }),
+        );
+      } catch (e) {
+        // ignore in non-browser environments
+      }
+      return result;
     } catch (error) {
       throw new Error(getErrorMessage(error, "Failed to unfollow user"));
     }
