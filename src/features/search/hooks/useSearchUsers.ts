@@ -88,6 +88,24 @@ export function useSearchUsers(keyword: string | undefined) {
     fetchAll();
   }, [fetchAll, keyword]);
 
+  // Listen for follow changes elsewhere in the app (e.g., ProfilePage)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent)?.detail as
+        | { userId?: string; isFollowing?: boolean }
+        | undefined;
+      if (!detail?.userId) return;
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === detail.userId ? { ...u, isFollowing: !!detail.isFollowing } : u,
+        ),
+      );
+    };
+
+    window.addEventListener("follow-changed", handler as EventListener);
+    return () => window.removeEventListener("follow-changed", handler as EventListener);
+  }, []);
+
   const toggleFollow = useCallback(async (user: UserSearchResponse) => {
     const next = !user.isFollowing;
 
