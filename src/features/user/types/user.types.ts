@@ -19,6 +19,7 @@ export interface UserProfile {
   isFollowing: boolean;
   isPrivate?: boolean;
   isVerified?: boolean;
+  isBlocked?: boolean;
 }
 
 export interface UpdateProfileRequest {

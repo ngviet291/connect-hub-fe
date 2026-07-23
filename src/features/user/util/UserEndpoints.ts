@@ -8,12 +8,15 @@ export const USER_ENDPOINTS = {
   UNFOLLOW_USER: (id: string) => `/v1/users/${id}/unfollow`,
 
   SEARCH: `/v1/users/search`,
-  AVATAR_UPLOAD: `/v1/users/avatar/upload`,
-  AVATAR_DELETE: `/v1/users/avatar/delete`,
+  
   AVATAR: `/v1/users/avatar`,
   STATUS: `/v1/users/status`,
   STATS: `/v1/users/stats`,
   ADMIN_USERS: `/v1/admin/users/allusers`,
   ADMIN_USERS_LOCK: (id: string) => `/v1/users/${id}/lock`,
   ADMIN_USERS_UNLOCK: (id: string) => `/v1/users/${id}/unlock`,
+  USERS_BLOCK: (id: string) => `/v1/users/${id}/block`,
+  USERS_UNBLOCK: (id: string) => `/v1/users/${id}/unblock`,
+  USERS_BLOCKED: `/v1/users/blocked`,
+  USERS_BLOCK_STATUS: (id: string) => `/v1/${id}/block/status`,
 } as const;

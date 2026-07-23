@@ -72,6 +72,7 @@ export const ProfilePage = () => {
   const [loadError, setLoadError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
   const [composeOpen, setComposeOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("posts");
   const tabsRef = useRef<HTMLDivElement>(null);
@@ -112,7 +113,9 @@ export const ProfilePage = () => {
     try {
       setProfile(null);
       const user = await userService.getUserByUsername(username);
+      const blockStatus = await userService.getBlockStatus(user.id);
       setProfile(user);
+      setIsBlocked(blockStatus);
 
       const stats = await followService.getStats(user.id);
       setProfile((prev) => (prev ? { ...prev, ...stats } : null));
@@ -127,6 +130,19 @@ export const ProfilePage = () => {
     fetchProfile();
   }, [username]);
   useEffect(() => setActiveTab("posts"), [username]);
+
+  useEffect(() => {
+    const handleBlockedStateChanged = () => {
+      if (profile?.id) {
+        userService.getBlockStatus(profile.id).then(setIsBlocked);
+      }
+    };
+
+    window.addEventListener("blocked-state-changed", handleBlockedStateChanged);
+    return () => {
+      window.removeEventListener("blocked-state-changed", handleBlockedStateChanged);
+    };
+  }, [profile?.id]);
 
   if (isLoading) return <ProfileHeaderSkeleton />;
   if (loadError || !profile)
@@ -185,6 +201,31 @@ export const ProfilePage = () => {
     }
   };
 
+  const toggleBlock = async () => {
+    if (!profile) return;
+
+    const willBlock = !isBlocked;
+
+    try {
+      if (willBlock) {
+        await userService.blockUser(profile.id);
+        setIsBlocked(true);
+        setProfile((p) => (p ? { ...p, isBlocked: true } : p));
+        window.dispatchEvent(new Event("blocked-state-changed"));
+        showToast(t("success_block_user"), "success");
+      } else {
+        await userService.unblockUser(profile.id);
+        setIsBlocked(false);
+        setProfile((p) => (p ? { ...p, isBlocked: false } : p));
+        window.dispatchEvent(new Event("blocked-state-changed"));
+        showToast(t("success_unblock_user"), "success");
+      }
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : t("error_generic");
+      showToast(msg, "error");
+    }
+  };
+
   /* completion cards left = 4 (mock) */
   const completionLeft = 4;
 
@@ -216,7 +257,11 @@ export const ProfilePage = () => {
                     },
                   ]
                 : [
-                    { label: t("block_user"), onClick: () => {} },
+                    {
+                      label: isBlocked ? t("unblock_user") : t("block_user"),
+                      danger: true,
+                      onClick: toggleBlock,
+                    },
                     { label: t("report"), danger: true, onClick: () => {} },
                   ]
             }
@@ -255,6 +300,11 @@ export const ProfilePage = () => {
                 <span className="ml-1 text-primary">✓</span>
               )}
             </p>
+            {isBlocked && (
+              <span className="mt-1 inline-flex w-fit rounded-full border border-danger/30 bg-danger/10 px-2.5 py-1 text-[12px] font-semibold text-danger">
+                {t("blocked_status")}
+              </span>
+            )}
           </div>
           <Avatar src={profile.avatarUrl} name={profile.fullName} size="xl" />
         </div>
@@ -337,7 +387,11 @@ export const ProfilePage = () => {
                     icon: <ShareIcon size={16} />,
                     onClick: handleCopyProfileLink,
                   },
-                  { label: t("block_user"), danger: true, onClick: () => {} },
+                  {
+                    label: isBlocked ? t("unblock_user") : t("block_user"),
+                    danger: true,
+                    onClick: toggleBlock,
+                  },
                   { label: t("report"), danger: true, onClick: () => {} },
                 ]}
               />

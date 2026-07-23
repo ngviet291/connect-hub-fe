@@ -17,6 +17,35 @@ const normalizePost = (post: SearchPostResponse): Post => {
   } as Post;
 };
 
+// xem đã follow chưa, nếu chưa thì set isFollowing = false
+const normalizeBoolean = (value: unknown): boolean => {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value === 1;
+  if (typeof value === "string") {
+    return value === "true" || value === "1" || value.toLowerCase() === "yes";
+  }
+  return false;
+};
+
+const normalizeUserSearchResponse = (
+  user: Record<string, unknown>,
+): UserSearchResponse => ({
+  id: String(user.id),
+  username: String(user.username ?? user.userName ?? user.user_name ?? ""),
+  fullName: String(user.fullName ?? user.full_name ?? ""),
+  avatarUrl: typeof user.avatarUrl === "string" ? user.avatarUrl : undefined,
+  bio: typeof user.bio === "string" ? user.bio : undefined,
+  isFollowing: normalizeBoolean(
+    user.isFollowing ??
+      user.is_following ??
+      user.isFollowed ??
+      user.is_followed ??
+      user.followed ??
+      user.followed_by_me ??
+      user.followedByMe,
+  ),
+});
+
 export const searchService = {
   searchUsers: async (
     keyword: string,
@@ -39,7 +68,12 @@ export const searchService = {
         throw new Error(getErrorMessage(data?.message, "Failed to search users"));
       }
 
-      return data.data;
+      return {
+        ...data.data,
+        content: data.data.content.map((user) =>
+          normalizeUserSearchResponse(user as unknown as Record<string, unknown>),
+        ),
+      };
     } catch (error) {
       throw new Error(getErrorMessage(error, "Failed to search users"));
     }
